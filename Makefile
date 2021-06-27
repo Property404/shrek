@@ -1,10 +1,16 @@
-all: build
-build:
-	arm-none-eabi-as -march=armv7-a -mcpu=cortex-a15 _start.S -o _start.o
-	arm-none-eabi-gcc -ffreestanding -Wall -Wextra -c start.c -o start.o
-	arm-none-eabi-ld -T linker.ld _start.o start.o -o kernel.elf
+AS=arm-none-eabi-as
+CC=arm-none-eabi-gcc
+
+LDFLAGS=-T linker.ld 
+CFLAGS=-march=armv7-a -ffreestanding -Wall -Wextra -fmax-errors=3
+ASFLAGS=-march=armv7-a
+OBJECTS=_start.o start.o serial.o io.o console.o cmisc.o
+
+build: kernel.elf
+kernel.elf: $(OBJECTS)
+	arm-none-eabi-ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
 clean:
-	rm *.o
-	rm *.elf
+	rm -f *.o
+	rm -f *.elf
 run: build
 	qemu-system-arm -M vexpress-a15 -cpu cortex-a15 -kernel kernel.elf -nographic

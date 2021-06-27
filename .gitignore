@@ -2,5 +2,6 @@
 !.gitignore
 !Makefile
 !*.c
+!*.h
 !*.ld
 !*.S
