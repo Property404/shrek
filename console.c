@@ -15,12 +15,13 @@ void console(void) {
 
         while(true) {
             while(! testchar());
+
             const int c = getchar();
             if (c < 0) {
                 puts("[IO-Error]");
             }
             if (c == '\r' || c == '\n') {
-                putchar('[LF]\n');
+                putchar('\n');
                 break;
             }
             if (buffer_index < sizeof(input_buffer)) {

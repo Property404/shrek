@@ -4,7 +4,7 @@ CC=arm-none-eabi-gcc
 LDFLAGS=-T linker.ld 
 CFLAGS=-march=armv7-a -ffreestanding -Wall -Wextra -fmax-errors=3
 ASFLAGS=-march=armv7-a
-OBJECTS=_start.o start.o serial.o io.o console.o cmisc.o
+OBJECTS= start.o main.o serial.o io.o console.o cmisc.o
 
 build: kernel.elf
 kernel.elf: $(OBJECTS)
