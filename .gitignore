@@ -1,7 +1,12 @@
 *
+
 !.gitignore
 !Makefile
+
 !*.c
 !*.h
 !*.ld
 !*.S
+!*.dts
+
+!dts
