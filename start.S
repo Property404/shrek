@@ -8,8 +8,17 @@ _start:
     mov r9, pc
     sub r9, r9, #8
 
+    /* Save off boot params to v4/v5
+           Same conventions as Linux:
+           r0 holds 0
+           r1 holds the machine type
+           r2 holds the DTB pointer
+   */
+    mov v4, r1
+    mov v5, r2
+
     /* Address linker expects to be loaded at, which is probably wrong */
-    ldr r4, =_kernel_initial_base
+    ldr v1, =_kernel_initial_base
 
     /*
        Set up the stack
@@ -17,7 +26,7 @@ _start:
        Same goes for _got_end and _got_start
      */
     ldr sp, =_stack_top
-    sub sp, sp, r4
+    sub sp, sp, v1
     add sp, sp, r9
 
     /*
@@ -26,36 +35,13 @@ _start:
        We do this so we don't have to compile a different kernel for
        each load address
      */
-
-    ldr r5, =_got_end
-    sub r5, r5, r4
-    add r5, r5, r9
-
-    ldr r6,=_got_start // ptr
-    sub r6, r6, r4
-    add r6, r6, r9
-    _got_adjust_loop:
-
-        // Update entry
-        ldr r8, [r6]//r8=*ptr
-        sub r8, r8, r4//r8 -= _kernel_initial_base
-        add r8, r8, r9//r8 += initial_pc
-        str r8, [r6]//*ptr = r8
-
-        add r6, r6, #4
-        cmp r6, r5
-    bne _got_adjust_loop
-
-
-    /* Same conventions as Linux:
-       r0 holds 0
-       r1 holds the machine type
-       r2 holds the DTB pointer
-   */
-    mov r0, r1
-    mov r1, r2
+    mov a1, v1
+    mov a2, r9
+    bl fixup_got
 
     /* This shouldn't return */
+    mov a1, v4
+    mov a2, v5
     bl boot
 
     /* But if it does, enter a low power state*/
