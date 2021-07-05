@@ -46,7 +46,7 @@ int strcmp(const char* s1, const char* s2) {
     return strncmp(s1, s2, SIZE_MAX);
 }
 
-static bool string_has(const char* string, char character) {
+bool string_has(const char* string, char character) {
     for(size_t i=0; string[i] != '\0'; i++) {
         if(string[i] == character)
             return true;

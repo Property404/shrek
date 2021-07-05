@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 // Standard C library function replacements
 //
 // Prototypes may be slightly different
@@ -14,6 +15,9 @@ int strncmp(const char* s1, const char* s2, size_t length);
 int strcmp(const char* s1, const char* s2);
 size_t strlen(const char* string);
 char* strsep(char** restrict stringp, const char* restrict delim);
+
+/* Check if string contains character */
+bool string_has(const char* string, char character);
 
 void* string_to_pointer(const char* str);
 uint32_t string_to_u32(const char* str);
