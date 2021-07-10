@@ -21,6 +21,4 @@ void boot(int machine_type, void* dtb) {
     printf("Machine type: %x\n", machine_type);
     printf("DTB pointer : %x\n", dtb);
     printf("DTB magic   : %x\n", *(uint32_t*)dtb);
-
-    main();
 }

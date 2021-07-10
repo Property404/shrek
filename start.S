@@ -1,4 +1,5 @@
-/* From https://wiki.osdev.org/ARMv7-A_Bare_Bones */
+/* Initially derived from
+ * https://wiki.osdev.org/ARMv7-A_Bare_Bones */
 .global _start
 _start:
     /*
@@ -18,7 +19,7 @@ _start:
     mov v5, r2
 
     /* Address linker expects to be loaded at, which is probably wrong */
-    ldr v1, =_kernel_initial_base
+    ldr v1, =_kernel_virtual_base
 
     /*
        Set up the stack
@@ -39,10 +40,46 @@ _start:
     mov a2, r9
     bl fixup_got
 
-    /* This shouldn't return */
+    // EARLY SERIAL SETUP 
+    /*
     mov a1, v4
     mov a2, v5
     bl boot
+    */
+
+    // Init page tables
+    bl init_paging
+
+    // Restore GOT
+    mov a1, r9
+    mov a2, v1
+    bl fixup_got
+
+    // Fixup stack and PC
+    ldr sp, =_stack_top
+    ldr pc, =_pc_fixup_ret
+    _pc_fixup_ret:
+
+    // Fixup DTB pointer
+    sub v5, v5, sb
+    //ldr v1, = _kernel_virtual_base
+    add v5, v5, v1
+
+    // Zero out BSS
+    ldr v1, =_bss_start
+    ldr v2, =_bss_end
+    mov r0, #0x0
+    _bss_zero_loop:
+        str r0, [v1]
+        add v1, v1, #4
+        cmp v1, v2
+        bne _bss_zero_loop
+
+    // This shouldn't return
+    mov a1, v4
+    mov a2, v5
+    bl boot
+    bl main
 
     /* But if it does, enter a low power state*/
 _loop_forever:

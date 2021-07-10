@@ -22,12 +22,12 @@ fixup_got:
 
     /*
        _got_end and _got_start are always
-       based off _kernel_initial_base
+       based off _kernel_virtual_base
 
-       If _kernel_initial_base, fixing up these two values
+       If _kernel_virtual_base, fixing up these two values
        are a no-op
     */
-    ldr v3, =_kernel_initial_base
+    ldr v3, =_kernel_virtual_base
 
     ldr v1, =_got_end
     sub v1, v1, v3

@@ -12,7 +12,6 @@ void console(void) {
     char input_buffer[CONSOLE_INPUT_BUFFER_SIZE + 1];// Extra 1 for null byte
     memcpy(&input_buffer, 0x00, sizeof(input_buffer));
 
-
     while (true) {
         puts("Shrek> ");
         size_t buffer_index = 0;

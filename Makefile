@@ -10,7 +10,7 @@ CFLAGS=-march=armv7-a -ffreestanding -Wall -Wextra -fmax-errors=3 -I include -Og
 ASFLAGS=-march=armv7-a -g3 -fpie -fpic
 CPP_DTC_FLAGS=-x assembler-with-cpp -nostdinc -I dts/include/ -D__ASSEMBLY__ -undef -D__DTS__
 
-OBJECTS = start.o main.o serial.o io.o console.o cmisc.o boot.o pl011_uart.o got.o
+OBJECTS = mmu.o mmu_asm.o start.o main.o serial.o io.o console.o cmisc.o boot.o pl011_uart.o got.o vectors.o
 
 all: kernel.bin
 kernel.elf: $(OBJECTS)

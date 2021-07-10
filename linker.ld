@@ -1,14 +1,37 @@
 /* Derived from https://wiki.osdev.org/ARMv7-A_Bare_Bones */
 ENTRY(_start)
- 
-SECTIONS {
-    . = 0x00000000;
 
-    _kernel_initial_base = .;
+SECTIONS {
+    /*_kernel_virtual_base = 0x40010000;*/
+    _kernel_virtual_base = 0x80000000;
+
+    /* This is the MAX size of the kernel itself in virtual mem
+     * Likely it's much smaller
+     * */
+    _kernel_size = 0x10000000;
+
+    _vectors_virtual_base = 0x00000000;/*TODO: change to high-vec */
+    _vectors_size = 0x00100000;
+    /* For remapping MMIO to virtual mem */
+    _mmio_map_base = _kernel_virtual_base + 0x10000000;
+    _mmio_map_size = 0x10000000;
+
+    /* 1MB sectors for "pages". Should eventually
+     * be 4K, but this is OK for now */
+    _page_size = 0x100000;
+
     _stack_size = 10000;
+    _ttl1_size = 4096*4;
+    _ttl2_size = 256*4;
  
-    .stub   : { start.o(.text) }
-    .text   : { *(.text) }
+    . = _kernel_virtual_base;
+    .stub   : {
+        start.o(.text)
+    }
+    .text   : {
+        EXCLUDE_FILE(*vectors.o) 
+            *(.text) 
+    }
     .rodata : { *(.rodata) }
     .data   : { *(.data) }
     .got.plt : { *(.got.plt) }
@@ -17,10 +40,26 @@ SECTIONS {
         *(.got);
         _got_end = .;
     }
-    .bss    : { *(.bss COMMON) }
-    .stack : {
+    .bss    : {
+        _bss_start = .;
+        *(.bss COMMON)
+        _bss_end = .;
+
+    }
+    .stack : ALIGN(16) {
         _stack_base = .;
         . += _stack_size;
         _stack_top = .;
+    }
+    .translation_table : ALIGN(_ttl1_size) {
+        _ttl1_base = .;
+        . += _ttl1_size;
+        _ttl2_base = .;
+        . += _ttl2_size * 4096;
+    }
+    /* This will be relocated to _vector_table_base */
+    .vtext : ALIGN(_page_size){
+        _vectors_initial_base = .;
+        vectors.o(.text)
     }
 }
