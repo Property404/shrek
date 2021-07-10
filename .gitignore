@@ -8,5 +8,6 @@
 !*.ld
 !*.S
 !*.dts
+!*.txt
 
 !dts

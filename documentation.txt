@@ -1,0 +1,7 @@
+Documentation used in this project:
+
+ARM Cortex-A Series Programmer's Guide (version 4.0)
+    (Referred to as "programmer's guide" in ARMv7 code)
+
+OS Dev Wiki:
+    https://wiki.osdev.org/ARMv7-A_Bare_Bones
