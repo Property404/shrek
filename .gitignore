@@ -11,3 +11,5 @@
 !*.txt
 
 !dts
+
+config.h

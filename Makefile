@@ -13,7 +13,9 @@ CPP_DTC_FLAGS=-x assembler-with-cpp -nostdinc -I dts/include/ -D__ASSEMBLY__ -un
 OBJECTS = mmu.o mmu_asm.o start.o main.o serial.o io.o console.o cmisc.o boot.o pl011_uart.o got.o vectors.o
 
 all: kernel.bin
-kernel.elf: $(OBJECTS)
+config.h: 
+	touch config.h
+kernel.elf: config.h *.h $(OBJECTS)
 	$(LD) $(LDFLAGS) $(OBJECTS) -o kernel.elf
 kernel.bin: kernel.elf
 	$(OBJCOPY) -O binary $< $@

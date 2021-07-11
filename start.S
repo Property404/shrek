@@ -1,5 +1,6 @@
 /* Initially derived from
  * https://wiki.osdev.org/ARMv7-A_Bare_Bones */
+#include "config.h"
 .global _start
 _start:
     /*
@@ -40,10 +41,11 @@ _start:
     mov a2, r9
     bl fixup_got
 
-    // EARLY SERIAL SETUP 
+#ifdef CONFIG_EARLY_SERIAL
     mov a1, v4
     mov a2, v5
     bl boot
+#endif
 
     // Init page tables
     bl init_paging
