@@ -3,15 +3,15 @@ ENTRY(_start)
 
 SECTIONS {
     /*_kernel_virtual_base = 0x40010000;*/
-    _kernel_virtual_base = 0x80000000;
+    _kernel_virtual_base = 0x80010000;
 
     /* This is the MAX size of the kernel itself in virtual mem
      * Likely it's much smaller
      * */
     _kernel_size = 0x10000000;
 
-    _vectors_virtual_base = 0x00000000;/*TODO: change to high-vec */
-    _vectors_size = 0x00100000;
+    _vectors_virtual_base = 0x00000000;/*TODO: change to highvecs */
+
     /* For remapping MMIO to virtual mem */
     _mmio_map_base = _kernel_virtual_base + 0x10000000;
     _mmio_map_size = 0x10000000;

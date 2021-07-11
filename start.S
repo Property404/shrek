@@ -41,11 +41,9 @@ _start:
     bl fixup_got
 
     // EARLY SERIAL SETUP 
-    /*
     mov a1, v4
     mov a2, v5
     bl boot
-    */
 
     // Init page tables
     bl init_paging

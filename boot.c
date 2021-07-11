@@ -14,7 +14,7 @@ void boot(int machine_type, void* dtb) {
         break;
     case MACHINE_TYPE_QEMU_VIRT:
     default:
-        pl011_uart_init((void*)0x9000000);
+        pl011_uart_init((void*)0x09000000);
         break;
     }
 

@@ -14,6 +14,8 @@ extern uint32_t _ttl1_base;
 extern uint32_t _ttl2_base;
 extern uint32_t _kernel_virtual_base;
 extern uint32_t _kernel_size;
+extern uint32_t _vectors_virtual_base;
+extern uint32_t _vectors_initial_base;
 
 /* Write page table entry to TTL1 */
 static void write_ttl1_pte(int index, uint32_t entry) {
@@ -51,26 +53,31 @@ static void map_page(uintptr_t virtual, uintptr_t physical, uint32_t attributes)
 
 void write_initial_page_tables(uint32_t initial_pc, uint32_t vbase) {
     // Full access, strongly ordered, global
-    const uint32_t sector_attributes = 0x00000DE2;
+    const uint32_t sector_attributes_device = 0x00000DE2;
+    const uint32_t page_attributes_device   = 0x00000032;
     const uint32_t l2desc_attributes = 0x000001E1;
-    const uint32_t page_attributes =   0x00000032;
+
+    // Normal, shareable, cacheable
+    const uint32_t page_attributes_normal   = 0x0000043E;
 
     // Flat mapping(TODO: don't do this)
-    for(unsigned i=0; i < 0x1000; i++) {
-        map_sector(i<<20, i<<20, sector_attributes);
+    for(unsigned i=1; i < 0x1000; i++) {
+        map_sector(i<<20, i<<20, sector_attributes_device);
     }
 
     // Map vector table
-    map_l2desc(0, l2desc_attributes);
-    map_page(0, 0, page_attributes);
+    const uint32_t vectors_virtual_base = ((uint32_t)&_vectors_virtual_base) - (initial_pc-vbase);
+    const uint32_t vectors_physical_base = &_vectors_initial_base;
+    map_l2desc(vectors_virtual_base, l2desc_attributes);
+    map_page(vectors_virtual_base, vectors_physical_base, page_attributes_device);
 
-    // Map kernel --assuming size is <= 1MB
+    // Map kernel
     const uint32_t kernel_virtual_base = vbase;
     const size_t kernel_size = (uint32_t)(&_kernel_size)-(initial_pc-vbase);
     for(size_t i=0;i<kernel_size;i+=SECTOR_SIZE) {
         map_l2desc(kernel_virtual_base+i, l2desc_attributes);
     }
     for(size_t i=0;i<kernel_size;i+=PAGE_SIZE) {
-        map_page(kernel_virtual_base+i, initial_pc+i, page_attributes);
+        map_page(kernel_virtual_base+i, initial_pc+i, page_attributes_normal);
     }
 }
