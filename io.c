@@ -30,7 +30,6 @@ void nputs(const char* buffer, size_t len) {
 
 static void puthex(uint32_t val) {
     const char* hex_digits = "0123456789ABCDEF";
-    puts("0x");
     for(signed i=sizeof(val)-1;i>=0;i--) {
         uint8_t byte = (val >> (8*i)) & 0xFF;
         putchar(hex_digits[byte/16]);
@@ -80,7 +79,7 @@ static int parse_placeholder(const char* fmt, FormatPlaceholder* placeholder) {
     // These HAVE to end with an extra '\0'
     const char* FORMAT_FLAGS = "0\0";
     //const char* FORMAT_LENGTHS = "ll\0l\0q\0";
-    const char* FORMAT_TYPES = "d\0p\0x\0s\0";
+    const char* FORMAT_TYPES = "p\0x\0s\0c\0d\0i\0";
 
     placeholder->flag = NULL;
     placeholder->width = 0;
@@ -127,10 +126,15 @@ void printf(const char* fmt, ...) {
                     puthex(va_arg(args, unsigned));
                     break;
                 case 'p':
+                    puts("0x");
                     puthex(va_arg(args, unsigned));
                     break;
                 case 's':
                     puts(va_arg(args, char*));
+                    break;
+                case 'c':
+                    // integer promotion happens here
+                    putchar((va_arg(args, int)));
                     break;
                 case '%':
                     putchar('%');

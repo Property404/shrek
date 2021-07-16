@@ -80,13 +80,32 @@ static int echo(int argc, char** argv) {
 
 // display memory
 static int md(int argc, char** argv) {
+    const size_t WORDS_PER_ROW = 4;
+
     if(argc < 2)
     {
         puts("Error: Not enough arguments!\n");
         return -1;
     }
-    const uint8_t* address = (uint8_t*)string_to_pointer(argv[1]);
-    printf("Address: %x\n", address);
+    const uint32_t* address = (uint8_t*)string_to_pointer(argv[1]);
+
+    for(int i=0; i<16;i++) {
+        printf("%p: ", address);
+        for(unsigned j=0; j < WORDS_PER_ROW; j++) {
+            printf("%08x ", *(address+j));
+        }
+        puts(" ");
+        for(unsigned j=0; j < WORDS_PER_ROW*sizeof(uint32_t);j++) {
+            char c = *((uint8_t*)(address)+j);
+            if (c < 0x20 || c >= 0x7F) {
+                c = '.';
+            }
+            putchar(c);
+        }
+
+        address += WORDS_PER_ROW;
+        putchar('\n');
+    }
 
     return 0;
 }
