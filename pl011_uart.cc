@@ -64,7 +64,7 @@ static int pl011_getchar(void) {
 }
 
 void pl011_uart_init(void* address) {
-    uart = address;
+    uart = (decltype(uart))address;
     serial_driver.getchar = pl011_getchar;
     serial_driver.putchar = pl011_putchar;
     serial_driver.testchar = pl011_testchar;

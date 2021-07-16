@@ -24,13 +24,13 @@ static void write_ttl1_pte(int index, uint32_t entry) {
     *pte_pointer = entry;
 }
 
-static void map_sector(uintptr_t virtual, uintptr_t physical, uint32_t attributes) {
-    write_ttl1_pte(virtual >> 20, physical | attributes);
+static void map_sector(uintptr_t virt, uintptr_t physical, uint32_t attributes) {
+    write_ttl1_pte(virt>> 20, physical | attributes);
 }
 
-static void map_l2desc(uintptr_t virtual, uint32_t attributes) {
+static void map_l2desc(uintptr_t virt, uint32_t attributes) {
     const uint32_t ttl2_base = (uint32_t)(&_ttl2_base);
-    const int index = virtual>>20;
+    const int index = virt>>20;
     write_ttl1_pte(index, (ttl2_base + TTL2_NUM_ENTRIES*index*4) |  attributes);
 }
 
@@ -41,17 +41,17 @@ static void write_ttl2_pte(int index1, int index2, uint32_t entry) {
     *pte_pointer = entry;
 }
 
-static void map_page(uintptr_t virtual, uintptr_t physical, uint32_t attributes) {
+static void map_page(uintptr_t virt, uintptr_t physical, uint32_t attributes) {
     // TTL1 index is the top 12 bits
-    const int index = virtual >> 20;
+    const int index = virt>> 20;
 
     // TTL2 index is the next 8 bits
-    const int index2 = (virtual & 0xFF000)>>12;
+    const int index2 = (virt& 0xFF000)>>12;
 
     write_ttl2_pte(index, index2, physical | attributes);
 }
 
-void write_initial_page_tables(uint32_t initial_pc, uint32_t vbase) {
+extern "C" void write_initial_page_tables(uint32_t initial_pc, uint32_t vbase) {
     // Full access, strongly ordered, global
     const uint32_t sector_attributes_device = 0x00000DE2;
     const uint32_t page_attributes_device   = 0x00000032;
@@ -67,7 +67,7 @@ void write_initial_page_tables(uint32_t initial_pc, uint32_t vbase) {
 
     // Map vector table
     const uint32_t vectors_virtual_base = ((uint32_t)&_vectors_virtual_base) - (initial_pc-vbase);
-    const uint32_t vectors_physical_base = &_vectors_initial_base;
+    const uint32_t vectors_physical_base = (uintptr_t)(&_vectors_initial_base);
     map_l2desc(vectors_virtual_base, l2desc_attributes);
     map_page(vectors_virtual_base, vectors_physical_base, page_attributes_device);
 

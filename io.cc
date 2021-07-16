@@ -60,8 +60,8 @@ typedef struct {
  * Sets end with two nulls
  * */
 static const char* get_first_match(
-    const char* restrict string,
-    const char* restrict set
+    const char* __restrict__ string,
+    const char* __restrict__ set
 ) {
     while(*set != '\0') {
         const size_t length = strlen(set);

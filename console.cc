@@ -87,7 +87,7 @@ static int md(int argc, char** argv) {
         puts("Error: Not enough arguments!\n");
         return -1;
     }
-    const uint32_t* address = (uint8_t*)string_to_pointer(argv[1]);
+    const uint32_t* address = (uint32_t*)string_to_pointer(argv[1]);
 
     for(int i=0; i<16;i++) {
         printf("%p: ", address);

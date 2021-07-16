@@ -3,9 +3,7 @@
 #include "drivers.h"
 #include <stdint.h>
 #include "machine_types.h"
-int main(void);
-
-void boot(int machine_type, void* dtb) {
+extern "C" void boot(int machine_type, void* dtb) {
 
     // TODO: Use device trees
     switch (machine_type) {

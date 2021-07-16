@@ -2,13 +2,13 @@
 #include <stdbool.h>
 
 void memset(void* dest, uint8_t byte, size_t length) {
-    uint8_t* destination = dest;
+    uint8_t* destination = (uint8_t*)dest;
     for(size_t i=0;i<length;i++) {
         destination[i] = byte;
     }
 }
 
-void memcpy(void*restrict dest, const void*restrict src, size_t length) {
+void memcpy(void*__restrict__ dest, const void*__restrict__ src, size_t length) {
     for(size_t i=0;i<length;i++) {
         ((uint8_t*)dest)[i] = ((uint8_t*)src)[i];
     }
@@ -73,7 +73,7 @@ uint32_t string_to_u32(const char* str) {
 }
 
 void* string_to_pointer(const char* str) {
-    _Static_assert(sizeof (void*) == sizeof (uintptr_t),
+    static_assert(sizeof (void*) == sizeof (uintptr_t),
             "Can't determine pointer size");
 #if UINTPTR_MAX == 0xFFFFFFFF
     return (void*)(string_to_u32(str));
@@ -83,7 +83,7 @@ void* string_to_pointer(const char* str) {
 }
 
 
-char* strsep(char** restrict stringp, const char* restrict delim)
+char* strsep(char** __restrict__ stringp, const char* __restrict__ delim)
 {
     char* ptr = *stringp;
     if(ptr == NULL || *ptr == '\0')

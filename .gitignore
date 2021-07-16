@@ -4,6 +4,8 @@
 !Makefile
 
 !*.c
+!*.cpp
+!*.cc
 !*.h
 !*.ld
 !*.S

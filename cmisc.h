@@ -9,12 +9,12 @@
 // standards
 
 void memset(void* dest, uint8_t byte, size_t length);
-void memcpy(void*restrict dest, const void*restrict src, size_t length);
+void memcpy(void*__restrict__ dest, const void*__restrict__ src, size_t length);
 
 int strncmp(const char* s1, const char* s2, size_t length);
 int strcmp(const char* s1, const char* s2);
 size_t strlen(const char* string);
-char* strsep(char** restrict stringp, const char* restrict delim);
+char* strsep(char** __restrict__ stringp, const char* __restrict__ delim);
 
 /* Check if string contains character */
 bool string_has(const char* string, char character);

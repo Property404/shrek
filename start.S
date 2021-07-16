@@ -79,7 +79,7 @@ _start:
     mov a1, v4
     mov a2, v5
     bl boot
-    bl main
+    bl kmain
 
     /* But if it does, enter a low power state*/
 _loop_forever:
