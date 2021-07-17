@@ -48,6 +48,7 @@ _start:
 #endif
 
     // Init page tables
+    mov a1, v5
     bl init_paging
 
     // Restore GOT

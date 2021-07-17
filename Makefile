@@ -1,4 +1,5 @@
 CROSS_COMPILE?=arm-none-eabi-
+
 AS=$(CROSS_COMPILE)as
 CC=$(CROSS_COMPILE)gcc
 CXX=$(CROSS_COMPILE)g++
@@ -6,9 +7,10 @@ LD=$(CROSS_COMPILE)ld
 OBJCOPY=$(CROSS_COMPILE)objcopy
 QEMU=qemu-system-arm
 
+COMMON_GCC_FLAGS=-march=armv7-a -ffreestanding -Wall -Wextra -fmax-errors=1 -I include -Og -g3 -fpic
 LDFLAGS=-T linker.ld -g
-CFLAGS=-march=armv7-a -ffreestanding -Wall -Wextra -fmax-errors=1 -I include -Og -g3 -fpie -fpic
-CXXFLAGS=$(CFLAGS) -fno-exceptions
+CFLAGS=$(COMMON_GCC_FLAGS) -std=c11
+CXXFLAGS=$(COMMON_GCC_FLAGS) -fno-exceptions -std=c++17
 ASFLAGS=-march=armv7-a -g3 -fpie -fpic
 CPP_DTC_FLAGS=-x assembler-with-cpp -nostdinc -I dts/include/ -D__ASSEMBLY__ -undef -D__DTS__
 

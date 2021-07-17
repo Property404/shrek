@@ -4,6 +4,9 @@
    A lot of code was "liberated" from chapter 13.
    I believe chapter 13 discusses boot code from a bootloader's perspective, so
    we skip some initialization stuff
+
+    Arguments:
+    a1:  FDT pointer
 */
 
 .global init_paging
@@ -22,8 +25,9 @@ init_paging:
     dsb
     isb
 
-    mov a1, sb 
+    // a1 is already FDT
     ldr a2, =_kernel_virtual_base
+    mov a3, sb 
     bl write_initial_page_tables;
 
 

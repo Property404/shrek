@@ -2,13 +2,7 @@
 ENTRY(_start)
 
 SECTIONS {
-    /*_kernel_virtual_base = 0x40010000;*/
-    _kernel_virtual_base = 0x80010000;
-
-    /* This is the MAX size of the kernel itself in virtual mem
-     * Likely it's much smaller
-     * */
-    _kernel_size = 0x10000000;
+    _kernel_virtual_base = 0x90010000;
 
     _vectors_virtual_base = 0x00000000;/*TODO: change to highvecs */
 
@@ -16,9 +10,7 @@ SECTIONS {
     _mmio_map_base = _kernel_virtual_base + 0x10000000;
     _mmio_map_size = 0x10000000;
 
-    /* 1MB sectors for "pages". Should eventually
-     * be 4K, but this is OK for now */
-    _page_size = 0x100000;
+    _page_size = 0x1000;
 
     _stack_size = 10000;
     _ttl1_size = 4096*4;
@@ -62,4 +54,5 @@ SECTIONS {
         _vectors_initial_base = .;
         vectors.o(.text)
     }
+    _kernel_virtual_end = .;
 }
