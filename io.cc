@@ -1,10 +1,23 @@
 #include "io.h"
 #include "cmisc.h"
+#include "serial.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdarg.h>
 
 #define ARRAY_LENGTH(x) sizeof(x)/sizeof(*x)
+
+void putchar(char c){
+    serial_driver.putchar(c);
+};
+
+bool testchar(void) {
+    return serial_driver.testchar();
+}
+
+int getchar(void){
+    return serial_driver.getchar();
+}
 
 void puts(const char* buffer) {
     if(buffer == NULL) {

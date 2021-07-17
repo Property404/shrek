@@ -14,6 +14,7 @@
 #include "serial.h"
 #include "drivers.h"
 #include "errno.h"
+#include "mmu.h"
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -63,8 +64,9 @@ static int pl011_getchar(void) {
     return data;
 }
 
+#include "io.h"
 void pl011_uart_init(void* address) {
-    uart = (decltype(uart))address;
+    uart = (decltype(uart))remap_mmio(address);
     serial_driver.getchar = pl011_getchar;
     serial_driver.putchar = pl011_putchar;
     serial_driver.testchar = pl011_testchar;

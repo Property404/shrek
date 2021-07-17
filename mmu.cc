@@ -1,9 +1,10 @@
+#include <assert.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <stddef.h>
-#include <assert.h>
 #include "common.h"
 #include "io.h"
+#include "mmu.h"
 #define KB (1024)
 #define MB (KB*KB)
 #define TTL1_NUM_ENTRIES 4096
@@ -20,6 +21,7 @@ extern uint32_t _kernel_virtual_base;
 extern uint32_t _kernel_virtual_end;
 extern uint32_t _vectors_virtual_base;
 extern uint32_t _vectors_initial_base;
+extern uint32_t _mmio_map_base;
 
 /* Write page table entry to TTL1 */
 static void write_ttl1_pte(int index, uint32_t entry) {
@@ -65,6 +67,22 @@ static void map_region_by_page(uintptr_t virt, uintptr_t physical, size_t size, 
     }
 }
 
+void* remap_mmio(void* physical_device_address) {
+    static unsigned block = 0;
+    const uint32_t page_attributes_device   = 0x00000032;
+
+    // Before initialization, everything is flat
+    if(!mmu_enabled()) {
+        return physical_device_address;
+    }
+    
+    const uintptr_t virtual_address = ((uintptr_t)&_mmio_map_base)+block*PAGE_SIZE;
+    map_page(virtual_address, (uintptr_t)physical_device_address, page_attributes_device);
+
+    block++;
+    return (void*)virtual_address;
+}
+
 extern "C" void write_initial_page_tables(
         uint32_t fdt_base,// true physical address
         uint32_t kernel_base,// true virtual address
@@ -75,15 +93,18 @@ extern "C" void write_initial_page_tables(
 
     // Full access, strongly ordered, global
     const uint32_t sector_attributes_device = 0x00000DE2;
-    const uint32_t page_attributes_device   = 0x00000032;
+    const uint32_t l2desc_attributes = 0x000001E1;
 
     // Normal, shareable, cacheable
     const uint32_t page_attributes_normal   = 0x0000043E;
 
-    // Flat mapping(TODO: don't do this)
-    for(unsigned i=1; i < 0x1000; i++) {
-        map_sector(i<<20, i<<20, sector_attributes_device);
-    }
+    // Add flat mapping for current code
+    const uintptr_t flat = ALIGN_DOWN(kernel_base+delusion, SECTOR_SIZE);
+    map_sector(flat, flat, sector_attributes_device);
+
+    // Map MMIO sector
+    const uintptr_t mmio_base = ((uintptr_t)&_mmio_map_base) - delusion;
+    map_l2desc(mmio_base, l2desc_attributes);
 
     // Map vector table
     const uint32_t vectors_virtual_base = ((uint32_t)&_vectors_virtual_base) - delusion;
