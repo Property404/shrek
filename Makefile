@@ -14,7 +14,7 @@ CXXFLAGS=$(COMMON_GCC_FLAGS) -fno-exceptions -std=c++17
 ASFLAGS=-march=armv7-a -g3 -fpie -fpic
 CPP_DTC_FLAGS=-x assembler-with-cpp -nostdinc -I dts/include/ -D__ASSEMBLY__ -undef -D__DTS__
 
-OBJECTS = mmu.o mmu_asm.o start.o main.o serial.o io.o console.o cmisc.o boot.o pl011_uart.o got.o vectors.o
+OBJECTS = mmu.o mmu_asm.o start.o main.o serial.o io.o console.o cmisc.o boot.o pl011_uart.o got.o vectors.o panic.o
 
 all: kernel.bin
 config.h: 
@@ -30,11 +30,11 @@ clean:
 	rm -f *.elf
 	rm -f *.dtb
 	rm -f *.bin
+
+# TODO: Add DTBs
 vexpress: kernel.bin
 	$(QEMU) -s -machine vexpress-a15 -cpu cortex-a15 -kernel kernel.bin -serial mon:stdio -nographic
 virt: kernel.bin 
 	$(QEMU) -s -machine virt   -cpu cortex-a7 -kernel kernel.bin -serial mon:stdio -nographic
-
-# Note - this doesn't work yet
 pi: kernel.bin bcm2836-rpi-2-b.dtb
-	$(QEMU) -s -machine raspi2 -cpu cortex-a7 -kernel kernel.bin -serial mon:stdio -nographic -dtb bcm2836-rpi-2-b.dtb
+	$(QEMU) -s -machine raspi2 -cpu cortex-a7 -kernel kernel.bin -serial mon:stdio -nographic 

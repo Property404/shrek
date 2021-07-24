@@ -2,7 +2,7 @@
 ENTRY(_start)
 
 SECTIONS {
-    _kernel_virtual_base = 0x90010000;
+    _kernel_virtual_base = 0x00010000;
 
     _vectors_virtual_base = 0x00000000;/*TODO: change to highvecs */
 
