@@ -41,12 +41,22 @@ void nputs(const char* buffer, size_t len) {
     }
 }
 
-static void puthex(uint32_t val) {
-    const char* hex_digits = "0123456789ABCDEF";
-    for(signed i=sizeof(val)-1;i>=0;i--) {
-        uint8_t byte = (val >> (8*i)) & 0xFF;
-        putchar(hex_digits[byte/16]);
-        putchar(hex_digits[byte%16]);
+template <typename T>
+static void puthex(T val, bool upper, int width, char pad_character) {
+    const char* hex_digits = upper?
+        "0123456789ABCDEF":"0123456789abcdef";
+
+    bool hit = false;
+    for(int i=sizeof(val)*2-1;i>=0;i--) {
+        const uint8_t nybble = (val >> (4*i)) & 0x0F;
+        if(!hit && !nybble) {
+            if (width > i) {
+                putchar(pad_character);
+            }
+            continue;
+        }
+        putchar(hex_digits[nybble]);
+        hit = true;
     }
 }
 
@@ -134,14 +144,30 @@ void printf(const char* fmt, ...) {
                 return;
             }
             fmt = placeholder.end;
-            switch (*(placeholder.type)) {
-                case 'x':
-                    puthex(va_arg(args, unsigned));
-                    break;
+
+            const char type = *(placeholder.type);
+            switch (type) {
                 case 'p':
                     puts("0x");
-                    puthex(va_arg(args, unsigned));
+                    puthex(va_arg(args, uintptr_t), false, sizeof(uintptr_t)*2, '0');
                     break;
+                case 'X':
+                case 'x':
+                {
+                    const bool upper = type <= 'a';
+                    const auto width = placeholder.width;
+                    const auto pad_character = string_has(placeholder.flag, '0')?'0':' ';
+                    if (!strcmp(placeholder.length, "ll")) {
+                        puthex(va_arg(args, long long), upper, width, pad_character);
+                    } else if (!strcmp(placeholder.length, "l")) {
+                        puthex(va_arg(args, long), upper, width, pad_character);
+                    } else if (!strcmp(placeholder.length, "q")) {
+                        puthex(va_arg(args, uint64_t), upper, width, pad_character);
+                    } else  {
+                        puthex(va_arg(args, unsigned), upper, width, pad_character);
+                    }
+                    break;
+                }
                 case 's':
                     puts(va_arg(args, char*));
                     break;

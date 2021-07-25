@@ -5,3 +5,4 @@ ARM Cortex-A Series Programmer's Guide (version 4.0)
 
 OS Dev Wiki:
     https://wiki.osdev.org/ARMv7-A_Bare_Bones
+    https://wiki.osdev.org/Raspberry_Pi_Bare_Bones

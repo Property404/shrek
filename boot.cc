@@ -22,7 +22,7 @@ extern "C" void boot(int machine_type, void* dtb) {
         break;
     }
 
-    printf("Machine type: %x\n", machine_type);
-    printf("DTB pointer : %x\n", dtb);
-    printf("DTB magic   : %x\n", *(uint32_t*)dtb);
+    printf("Machine type: 0x%08x\n", machine_type);
+    printf("DTB pointer : %p\n", dtb);
+    printf("DTB magic   : 0x%08x\n", *(uint32_t*)dtb);
 }
