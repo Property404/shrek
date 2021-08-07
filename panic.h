@@ -1,5 +1,6 @@
 #pragma once
 #include <stdbool.h>
+
 // Stop forever
 void halt();
 
