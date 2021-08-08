@@ -5,4 +5,4 @@
 void halt();
 
 // Kernel panic!
-void panic(const char* fmt);
+void panic(const char* fmt, ...);

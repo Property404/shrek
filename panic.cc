@@ -5,13 +5,19 @@ void halt() {
     }
 }
 
-void panic(const char* fmt) {
+void panic(const char* fmt,...) {
     // Let's provide the option to not print anything
     // if serial isn't set up
-    if(fmt) {
+    if (fmt != nullptr) {
         puts("PANIC! ");
-        puts(fmt);
+
+        va_list args;
+        va_start(args, fmt);
+        vprintf(fmt, args);
+        va_end(args);
+
         putchar('\n');
     }
+
     halt();
 }

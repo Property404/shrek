@@ -135,6 +135,10 @@ static int parse_placeholder(const char* fmt, FormatPlaceholder* placeholder) {
 void printf(const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
+    vprintf(fmt, args);
+    va_end(args);
+}
+void vprintf(const char* fmt, va_list args) {
     while(*fmt != 0) {
         if (*fmt == '%') {
             fmt++;
