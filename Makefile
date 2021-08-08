@@ -37,11 +37,6 @@ linker.ld.processed:
 	 cpp $(DEFINES) linker.ld | grep -v '^#' > linker.ld.processed 
 %.dtb: dts/%.dts
 	cpp $(CPP_DTC_FLAGS) $< | dtc -O dtb -o $@
-
-# Kinda hacky: link targets are phony so we can
-# consecutively do `virt-test` and `virt` without problems.
-# Without this PHONY directive, we won't relink
-.PHONY: $(EXECUTABLE_NAME).elf $(EXECUTABLE_NAME).bin
 $(EXECUTABLE_NAME).elf: linker.ld.processed config.h *.h $(OBJECTS)
 	$(LD) $(LDFLAGS) $(OBJECTS) -o $(EXECUTABLE_NAME).elf
 $(EXECUTABLE_NAME).bin: $(EXECUTABLE_NAME).elf
