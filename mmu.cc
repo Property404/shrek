@@ -31,10 +31,16 @@ static void write_ttl1_pte(int index, uint32_t entry) {
 }
 
 static void map_sector(uintptr_t virt, uintptr_t physical, uint32_t attributes) {
+    if (!ALIGNED_TO(virt, SECTOR_SIZE)) {
+        panic("Unaligned sector mapping");
+    }
     write_ttl1_pte(virt>> 20, physical | attributes);
 }
 
 static void map_l2desc(uintptr_t virt, uint32_t attributes) {
+    if (!ALIGNED_TO(virt, SECTOR_SIZE)) {
+        panic("Unaligned l1->l2 mapping");
+    }
     const uint32_t ttl2_base = (uint32_t)(&_ttl2_base);
     const int index = virt>>20;
     write_ttl1_pte(index, (ttl2_base + TTL2_NUM_ENTRIES*index*4) |  attributes);
@@ -59,8 +65,8 @@ static void map_page(uintptr_t virt, uintptr_t physical, uint32_t attributes) {
 
 static void map_region_by_page(uintptr_t virt, uintptr_t physical, size_t size, uint32_t page_attributes) {
     const uint32_t l2desc_attributes = 0x000001E1;
-    for(size_t i=0;i<size;i+=SECTOR_SIZE) {
-        map_l2desc(virt+i, l2desc_attributes);
+    for(size_t i=0;i<=size;i+=SECTOR_SIZE) {
+        map_l2desc(ALIGN_DOWN(virt+i, SECTOR_SIZE), l2desc_attributes);
     }
     for(size_t i=0;i<size;i+=PAGE_SIZE) {
         map_page(virt+i, physical+i, page_attributes);
@@ -104,7 +110,7 @@ extern "C" void write_initial_page_tables(
 
     // Map MMIO sector
     const uintptr_t mmio_base = ((uintptr_t)&_mmio_map_base) - delusion;
-    map_l2desc(mmio_base, l2desc_attributes);
+    map_l2desc(ALIGN_DOWN(mmio_base, SECTOR_SIZE), l2desc_attributes);
 
     // Map vector table
     const uint32_t vectors_virtual_base = ((uint32_t)&_vectors_virtual_base) - delusion;

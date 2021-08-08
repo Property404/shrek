@@ -9,6 +9,9 @@
 // Align up if unaligned
 #define ALIGN_UP(value, size) (((value)%(size))?(ALIGN_DOWN((value+size), (size))):(value))
 
+// Check alignment
+#define ALIGNED_TO(value, size) (!((value) & (size-1)))
+
 // Convert big endian data to native endianness (little endian)
 template <typename T>
 T big_endian_to_native(T value) {

@@ -15,20 +15,38 @@ CXXFLAGS=$(COMMON_GCC_FLAGS) -fno-exceptions -std=c++17
 ASFLAGS=-march=armv7-a -g3 -fpie -fpic
 CPP_DTC_FLAGS=-x assembler-with-cpp -nostdinc -I dts/include/\
 	  -D__ASSEMBLY__ -undef -D__DTS__
+QEMU_FLAGS=-kernel $(EXECUTABLE_NAME).bin -serial mon:stdio -nographic 
 
 OBJECTS = Allocator.o mmu.o mmu_asm.o start.o main.o serial.o io.o console.o cmisc.o boot.o pl011_uart.o got.o vectors.o panic.o
 
-all: kernel.bin
+ifeq ($(findstring -debug,$(MAKECMDGOALS)),-debug)
+	QEMU_FLAGS+=-S
+endif
+ifeq ($(findstring -test,$(MAKECMDGOALS)),-test)
+	OBJECTS:=$(filter-out main.o,$(OBJECTS))
+	OBJECTS+=test.o
+	EXECUTABLE_NAME=kernel.test
+else
+	EXECUTABLE_NAME=kernel
+endif
+
+all: $(EXECUTABLE_NAME).bin
 config.h: 
 	touch config.h
 linker.ld.processed:
 	 cpp $(DEFINES) linker.ld | grep -v '^#' > linker.ld.processed 
-kernel.elf: linker.ld.processed config.h *.h $(OBJECTS)
-	$(LD) $(LDFLAGS) $(OBJECTS) -o kernel.elf
-kernel.bin: kernel.elf
-	$(OBJCOPY) -O binary $< $@
 %.dtb: dts/%.dts
 	cpp $(CPP_DTC_FLAGS) $< | dtc -O dtb -o $@
+
+# Kinda hacky: link targets are phony so we can
+# consecutively do `virt-test` and `virt` without problems.
+# Without this PHONY directive, we won't relink
+.PHONY: $(EXECUTABLE_NAME).elf $(EXECUTABLE_NAME).bin
+$(EXECUTABLE_NAME).elf: linker.ld.processed config.h *.h $(OBJECTS)
+	$(LD) $(LDFLAGS) $(OBJECTS) -o $(EXECUTABLE_NAME).elf
+$(EXECUTABLE_NAME).bin: $(EXECUTABLE_NAME).elf
+	$(OBJCOPY) -O binary $< $@
+
 clean:
 	rm -f *.o
 	rm -f *.elf
@@ -36,10 +54,19 @@ clean:
 	rm -f *.bin
 	rm -f *.processed
 
-# TODO: Add DTBs
-vexpress: kernel.bin
-	$(QEMU) -s -machine vexpress-a15 -cpu cortex-a15 -kernel kernel.bin -serial mon:stdio -nographic
-virt: kernel.bin 
-	$(QEMU) -s -machine virt   -cpu cortex-a7 -kernel kernel.bin -serial mon:stdio -nographic
-pi: kernel.bin bcm2836-rpi-2-b.dtb
-	$(QEMU) -s -machine raspi2 -cpu cortex-a7 -kernel kernel.bin -serial mon:stdio -nographic 
+# Run unit tests in qemu
+# Eg: `make pi-test`
+%-test:  % ;
+
+# Way to go into debug mode for QEMU targets
+# Example: `make pi-debug` or `make virt-debug`
+%-debug: % ;
+
+# QEMU targets
+vexpress: $(EXECUTABLE_NAME).bin
+	$(QEMU) -s -machine vexpress-a15 -cpu cortex-a15 $(QEMU_FLAGS)
+virt: $(EXECUTABLE_NAME).bin 
+	echo "hmm"
+	$(QEMU) -s -machine virt   -cpu cortex-a7 $(QEMU_FLAGS)
+pi: $(EXECUTABLE_NAME).bin bcm2836-rpi-2-b.dtb
+	$(QEMU) -s -machine raspi2 -cpu cortex-a7  $(QEMU_FLAGS)
