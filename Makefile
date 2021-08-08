@@ -7,19 +7,23 @@ LD=$(CROSS_COMPILE)ld
 OBJCOPY=$(CROSS_COMPILE)objcopy
 QEMU=qemu-system-arm
 
-COMMON_GCC_FLAGS=-march=armv7-a -ffreestanding -Wall -Wextra -fmax-errors=1 -I include -Og -g3 -fpic
-LDFLAGS=-T linker.ld -g
+COMMON_GCC_FLAGS=-march=armv7-a -ffreestanding -Wall -Wextra -fmax-errors=1 -I\
+	include -Og -g3 -fpic $(DEFINES)
+LDFLAGS=-T linker.ld.processed -g
 CFLAGS=$(COMMON_GCC_FLAGS) -std=c11
 CXXFLAGS=$(COMMON_GCC_FLAGS) -fno-exceptions -std=c++17
 ASFLAGS=-march=armv7-a -g3 -fpie -fpic
-CPP_DTC_FLAGS=-x assembler-with-cpp -nostdinc -I dts/include/ -D__ASSEMBLY__ -undef -D__DTS__
+CPP_DTC_FLAGS=-x assembler-with-cpp -nostdinc -I dts/include/\
+	  -D__ASSEMBLY__ -undef -D__DTS__
 
 OBJECTS = Allocator.o mmu.o mmu_asm.o start.o main.o serial.o io.o console.o cmisc.o boot.o pl011_uart.o got.o vectors.o panic.o
 
 all: kernel.bin
 config.h: 
 	touch config.h
-kernel.elf: config.h *.h $(OBJECTS)
+linker.ld.processed:
+	 cpp $(DEFINES) linker.ld | grep -v '^#' > linker.ld.processed 
+kernel.elf: linker.ld.processed config.h *.h $(OBJECTS)
 	$(LD) $(LDFLAGS) $(OBJECTS) -o kernel.elf
 kernel.bin: kernel.elf
 	$(OBJCOPY) -O binary $< $@
@@ -30,6 +34,7 @@ clean:
 	rm -f *.elf
 	rm -f *.dtb
 	rm -f *.bin
+	rm -f *.processed
 
 # TODO: Add DTBs
 vexpress: kernel.bin

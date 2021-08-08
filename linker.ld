@@ -1,8 +1,14 @@
 /* Derived from https://wiki.osdev.org/ARMv7-A_Bare_Bones */
+
+#include "config.h"
+#ifndef CONFIG_KERNEL_VIRTUAL_BASE
+#define CONFIG_KERNEL_VIRTUAL_BASE 0x00010000
+#endif
+
 ENTRY(_start)
 
 SECTIONS {
-    _kernel_virtual_base = 0x00010000;
+    _kernel_virtual_base = CONFIG_KERNEL_VIRTUAL_BASE;
 
     _vectors_virtual_base = 0x00000000;/*TODO: change to highvecs */
 
