@@ -1,15 +1,22 @@
 .global vector_table
 .section .text
 vector_table:
+// 0x00 - Reset
 b reset_handler
+// 0x04 - Illegal instruction
 b undefined_handler
+// 0x08 - Software Interrupt(syscall)
 b swi_handler
+// 0x0C - Instruction fetch
 b prefetch_handler
+// 0x10 - Mem fetch
 b data_handler
-nop //reserved
+// 0x14 - Reserved - not used for anything
+nop
+// 0x18 - Interrupt
 b irq_handler
 
-/* FIQ handler begins here */
+/* 0x1C - FIQ handler begins here */
 mov v5, #0x10
 b generic_handler
 
