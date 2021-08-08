@@ -26,6 +26,7 @@ ifeq ($(findstring -test,$(MAKECMDGOALS)),-test)
 	OBJECTS:=$(filter-out main.o,$(OBJECTS))
 	OBJECTS+=test.o
 	EXECUTABLE_NAME=kernel.test
+	QEMU_FLAGS+=-semihosting
 else
 	EXECUTABLE_NAME=kernel
 endif

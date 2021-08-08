@@ -34,6 +34,14 @@ static void list_test() {
     REQUIRE_EQUALS(list.size(), 3);
 }
 
+void quit_qemu() {
+    printf("Quitting QEMU...\n");
+    asm volatile("mov r0, #0x18");
+    asm volatile("ldr r1, =0x20026");
+    asm volatile("dsb");
+    asm volatile("svc 0x00123456");  // make semihosting call
+}
+
 extern "C" void kmain() {
     printf("Starting tests\n");
 
@@ -41,6 +49,6 @@ extern "C" void kmain() {
     list_test();
 
 
-    printf("Tests finished!\n");
-    halt();
+    printf("Test suite successful!\n");
+    quit_qemu();
 }
