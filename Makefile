@@ -63,5 +63,5 @@ vexpress: $(EXECUTABLE_NAME).bin
 	$(QEMU) -s -machine vexpress-a15 -cpu cortex-a15 $(QEMU_FLAGS)
 virt: $(EXECUTABLE_NAME).bin 
 	$(QEMU) -s -machine virt   -cpu cortex-a7 $(QEMU_FLAGS)
-pi: $(EXECUTABLE_NAME).bin bcm2836-rpi-2-b.dtb
+pi: $(EXECUTABLE_NAME).bin
 	$(QEMU) -s -machine raspi2 -cpu cortex-a7  $(QEMU_FLAGS)
