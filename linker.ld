@@ -38,16 +38,15 @@ SECTIONS {
         *(.got);
         _got_end = .;
     }
+    /* This will be relocated to _vector_table_base */
+    .vtext : ALIGN(_page_size){
+        _vectors_initial_base = .;
+        vectors.o(.text)
+    }
     .bss    : {
         _bss_start = .;
         *(.bss COMMON)
         _bss_end = .;
-
-    }
-    .stack : ALIGN(16) {
-        _stack_base = .;
-        . += _stack_size;
-        _stack_top = .;
     }
     .translation_table : ALIGN(_ttl1_size) {
         _ttl1_base = .;
@@ -55,10 +54,10 @@ SECTIONS {
         _ttl2_base = .;
         . += _ttl2_size * 4096;
     }
-    /* This will be relocated to _vector_table_base */
-    .vtext : ALIGN(_page_size){
-        _vectors_initial_base = .;
-        vectors.o(.text)
+    .stack : ALIGN(16) {
+        _stack_base = .;
+        . += _stack_size;
+        _stack_top = .;
     }
     _kernel_virtual_end = .;
 }
