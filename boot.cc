@@ -1,10 +1,16 @@
-#include "io.h"
-#include "serial.h"
 #include "common.h"
 #include "drivers.h"
-#include <stdint.h>
+#include "io.h"
 #include "machine_types.h"
+#include "memory.h"
+#include "serial.h"
+#include <stdint.h>
+
+extern uint32_t _heap_base;
+extern uint32_t _heap_size;
 extern "C" void boot(int machine_type, void* dtb) {
+    // Set up heap allocator
+    allocator.initialize(&_heap_base, reinterpret_cast<size_t>(&_heap_size));
 
     // TODO: Use device trees
     switch (machine_type) {

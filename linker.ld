@@ -17,8 +17,10 @@ SECTIONS {
     _mmio_map_size = 0x10000000;
 
     _page_size = 0x1000;
+    _sector_size = 0x100000;
 
     _stack_size = 10000;
+    _heap_size = _sector_size;
     _ttl1_size = 4096*4;
     _ttl2_size = 256*4;
  
@@ -53,6 +55,11 @@ SECTIONS {
         . += _ttl1_size;
         _ttl2_base = .;
         . += _ttl2_size * 4096;
+    }
+    .heap : ALIGN(_sector_size) {
+        _heap_base = .;
+        . += _stack_size;
+        _heap_top = .;
     }
     .stack : ALIGN(16) {
         _stack_base = .;

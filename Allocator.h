@@ -1,5 +1,6 @@
 #include "common.h"
 #include <cstddef>
+
 /// A memory allocator intended to be used to
 /// allocate memory off Shrek's heap.
 class Allocator {

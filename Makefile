@@ -17,7 +17,7 @@ CPP_DTC_FLAGS=-x assembler-with-cpp -nostdinc -I dts/include/\
 	  -D__ASSEMBLY__ -undef -D__DTS__
 QEMU_FLAGS=-kernel $(EXECUTABLE_NAME).bin -serial mon:stdio -nographic 
 
-OBJECTS = Allocator.o mmu.o mmu_asm.o start.o main.o serial.o io.o console.o cmisc.o boot.o pl011_uart.o got.o vectors.o panic.o
+OBJECTS = memory.o Allocator.o mmu.o mmu_asm.o start.o main.o serial.o io.o console.o cmisc.o boot.o pl011_uart.o got.o vectors.o panic.o
 
 ifeq ($(findstring -debug,$(MAKECMDGOALS)),-debug)
 	QEMU_FLAGS+=-S
@@ -66,7 +66,6 @@ clean:
 vexpress: $(EXECUTABLE_NAME).bin
 	$(QEMU) -s -machine vexpress-a15 -cpu cortex-a15 $(QEMU_FLAGS)
 virt: $(EXECUTABLE_NAME).bin 
-	echo "hmm"
 	$(QEMU) -s -machine virt   -cpu cortex-a7 $(QEMU_FLAGS)
 pi: $(EXECUTABLE_NAME).bin bcm2836-rpi-2-b.dtb
 	$(QEMU) -s -machine raspi2 -cpu cortex-a7  $(QEMU_FLAGS)

@@ -49,7 +49,7 @@ static void puthex(T val, bool upper, int width, char pad_character) {
     bool hit = false;
     for(int i=sizeof(val)*2-1;i>=0;i--) {
         const uint8_t nybble = (val >> (4*i)) & 0x0F;
-        if(!hit && !nybble) {
+        if(!hit && !nybble && i != 0) {
             if (width > i) {
                 putchar(pad_character);
             }
