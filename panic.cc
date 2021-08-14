@@ -1,11 +1,13 @@
+#include "panic.h"
 #include "io.h"
+
 void halt() {
-    while(true) {
+    while (true) {
         asm volatile ("wfi");
     }
 }
 
-void panic(const char* fmt,...) {
+void panic(const char* fmt, ...) {
     // Let's provide the option to not print anything
     // if serial isn't set up
     if (fmt != nullptr) {

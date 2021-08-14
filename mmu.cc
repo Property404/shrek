@@ -63,12 +63,13 @@ static void map_page(uintptr_t virt, uintptr_t physical, uint32_t attributes) {
     write_ttl2_pte(index, index2, physical | attributes);
 }
 
-static void map_region_by_page(uintptr_t virt, uintptr_t physical, size_t size, uint32_t page_attributes) {
+static void
+map_region_by_page(uintptr_t virt, uintptr_t physical, size_t size, uint32_t page_attributes) {
     const uint32_t l2desc_attributes = 0x000001E1;
-    for(size_t i=0;i<=size;i+=SECTOR_SIZE) {
+    for (size_t i=0; i <= size; i+=SECTOR_SIZE) {
         map_l2desc(ALIGN_DOWN(virt+i, SECTOR_SIZE), l2desc_attributes);
     }
-    for(size_t i=0;i<size;i+=PAGE_SIZE) {
+    for (size_t i=0; i < size; i+=PAGE_SIZE) {
         map_page(virt+i, physical+i, page_attributes);
     }
 }
@@ -78,10 +79,10 @@ void* remap_mmio(void* physical_device_address) {
     const uint32_t page_attributes_device   = 0x00000032;
 
     // Before initialization, everything is flat
-    if(!mmu_enabled()) {
+    if (!mmu_enabled()) {
         return physical_device_address;
     }
-    
+
     const uintptr_t virtual_address = ((uintptr_t)&_mmio_map_base)+block*PAGE_SIZE;
     map_page(virtual_address, (uintptr_t)physical_device_address, page_attributes_device);
 
@@ -90,11 +91,10 @@ void* remap_mmio(void* physical_device_address) {
 }
 
 extern "C" void write_initial_page_tables(
-        uint32_t fdt_base,// true physical address
-        uint32_t kernel_base,// true virtual address
-        uint32_t initial_pc// physical address
-)
-{
+    uint32_t fdt_base,  // true physical address
+    uint32_t kernel_base,  // true virtual address
+    uint32_t initial_pc  // physical address
+) {
     const ptrdiff_t delusion =  (initial_pc-kernel_base);
 
     // Full access, strongly ordered, global
@@ -115,7 +115,10 @@ extern "C" void write_initial_page_tables(
     // Map vector table
     const uint32_t vectors_virtual_base = ((uint32_t)&_vectors_virtual_base) - delusion;
     const uint32_t vectors_physical_base = (uintptr_t)(&_vectors_initial_base);
-    map_region_by_page(vectors_virtual_base, vectors_physical_base, PAGE_SIZE, page_attributes_normal);
+    map_region_by_page(vectors_virtual_base,
+        vectors_physical_base,
+        PAGE_SIZE,
+        page_attributes_normal);
 
     // Map code (kernel + preceding RAM)
     size_t ksize = (uintptr_t)(&_kernel_virtual_end)-(uintptr_t)(&_kernel_virtual_base);
@@ -123,5 +126,9 @@ extern "C" void write_initial_page_tables(
     map_region_by_page(kernel_base, initial_pc, ksize, page_attributes_normal);
 
     // Map FDT
-    map_region_by_page(ALIGN_DOWN(fdt_base - delusion, PAGE_SIZE), ALIGN_DOWN(fdt_base, PAGE_SIZE), 0x10000, page_attributes_normal);
+    map_region_by_page(
+        ALIGN_DOWN(fdt_base - delusion, PAGE_SIZE),
+        ALIGN_DOWN(fdt_base, PAGE_SIZE),
+        0x10000,
+        page_attributes_normal);
 }

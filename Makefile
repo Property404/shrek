@@ -43,6 +43,9 @@ $(EXECUTABLE_NAME).elf: linker.ld.processed config.h *.h $(OBJECTS)
 $(EXECUTABLE_NAME).bin: $(EXECUTABLE_NAME).elf
 	$(OBJCOPY) -O binary $< $@
 
+lint:
+	cpplint *.cc *.h
+
 clean:
 	rm -f *.o
 	rm -f *.elf

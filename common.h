@@ -1,7 +1,7 @@
 #pragma once
-#include "panic.h"
 #include <cstdint>
 #include <typeinfo>
+#include "panic.h"
 
 // Align down if unaligned
 #define ALIGN_DOWN(value, size) ((value) & ~(size-1))

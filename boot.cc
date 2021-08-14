@@ -1,10 +1,10 @@
+#include <stdint.h>
 #include "common.h"
 #include "drivers.h"
 #include "io.h"
 #include "machine_types.h"
 #include "memory.h"
 #include "serial.h"
-#include <stdint.h>
 
 extern uint32_t _heap_base;
 extern uint32_t _heap_size;

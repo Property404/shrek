@@ -1,5 +1,6 @@
-#include "common.h"
+#pragma once
 #include <cstddef>
+#include "common.h"
 
 /// A memory allocator intended to be used to
 /// allocate memory off Shrek's heap.
@@ -28,8 +29,7 @@ class Allocator {
     // Contains the mem-alloc implementation.
     void* allocate_internal(size_t size);
 
-    public:
-
+ public:
     Allocator(void* buffer, size_t buffer_size);
 
     /// Called by the constructor. This is

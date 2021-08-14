@@ -2,7 +2,8 @@
 #include "io.h"
 #include "List.h"
 
-#define REQUIRE_EQUALS(value1, value2) {if ((value1) != value2) { printf("%x != %x\n", (value1), (value2));panic("Assertion failed");}}
+#define REQUIRE_EQUALS(value1, value2) {if ((value1) != value2)\
+    { printf("%x != %x\n", (value1), (value2)); panic("Assertion failed");}}
 #define REQUIRE(condition) {if (!(condition)) { panic("Assert failed: '" #condition );}}
 #define REQUIRE_NOT(condition) REQUIRE(!(condition))
 

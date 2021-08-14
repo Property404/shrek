@@ -2,6 +2,7 @@
 
 !.gitignore
 !Makefile
+!CPPLINT.cfg
 
 !*.c
 !*.cpp

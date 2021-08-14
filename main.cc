@@ -1,7 +1,8 @@
-#include "io.h"
-#include "console.h"
 #include <stdint.h>
-uint32_t _ttl1_base;
+
+#include "console.h"
+#include "io.h"
+
 extern "C" void kmain(void) {
     console();
 

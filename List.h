@@ -1,6 +1,6 @@
 #pragma once
-#include "memory.h"
 #include <utility>
+#include "memory.h"
 
 /// Linked list.
 template <typename T>
@@ -14,8 +14,7 @@ class List {
     Node* tail_;
     size_t size_;
 
-    public:
-
+ public:
     List() {
         head_ = nullptr;
         tail_ = nullptr;
@@ -24,7 +23,7 @@ class List {
 
     ~List() {
         Node* node = head_;
-        while( node != nullptr) {
+        while (node != nullptr) {
             Node* next_node = node->next_;
 
             // No delete[] yet so do this explicitly
@@ -41,11 +40,11 @@ class List {
     List(const List& other) = delete;
     List(List&& other) = delete;
     List operator=(const List& other) = delete;
-    
+
     /// Add new item containing a copy of `data` to List.
     T& push_back(T data) {
         return emplace_back(std::move(data));
-    };
+    }
 
     /// Add new item containing `data` to List.
     T& emplace_back(T&& data) {
@@ -53,7 +52,7 @@ class List {
         new_node->data_ = std::move(data);
         new_node->next_ = nullptr;
 
-        if(tail_ == nullptr) {
+        if (tail_ == nullptr) {
             head_ = new_node;
             tail_ = new_node;
         } else {
@@ -63,22 +62,22 @@ class List {
 
         size_++;
         return new_node->data_;
-    };
+    }
 
     /// Get element from list at index `index`.
     /// This is O(N). If you're using this, you probably want a
     /// contiguous container instead.
     T& get(size_t index) const {
-        if(index >= size_) {
+        if (index >= size_) {
             panic("Can't access non-existent element in List");
         }
 
         size_t i = 0;
-        for(Node* node = head_; ;node = node->next_) {
-            if(node == nullptr) {
+        for (Node* node = head_ ;; node = node->next_) {
+            if (node == nullptr) {
                 panic("Encountered null node in List @0x%x", i);
             }
-            if(i == index) {
+            if (i == index) {
                 return node->data_;
             }
             i++;

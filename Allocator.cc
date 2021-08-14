@@ -1,6 +1,6 @@
-#include "common.h"
 #include "Allocator.h"
-     
+#include "common.h"
+
 
 Allocator::Allocator(void* buffer, size_t buffer_size) {
     initialize(buffer, buffer_size);
@@ -19,7 +19,7 @@ void Allocator::initialize(void* buffer, size_t buffer_size) {
 }
 
 void Allocator::add_node_after(void* pointer, size_t size, Node* prev_node) {
-    if(size == 0) {
+    if (size == 0) {
         panic("Zero-sized allocator nodes are forbidden");
     }
 
@@ -30,7 +30,6 @@ void Allocator::add_node_after(void* pointer, size_t size, Node* prev_node) {
     new_node->size = size;
     new_node->next = prev_node->next;
     prev_node->next = new_node;
-
 }
 
 void Allocator::check_bounds(void* pointer) const {
@@ -40,18 +39,17 @@ void Allocator::check_bounds(void* pointer) const {
 
     uintptr_t start = reinterpret_cast<uintptr_t>(buffer);
     uintptr_t end = start + buffer_size;
-    if(reinterpret_cast<uintptr_t>(pointer) < start ||
-        reinterpret_cast<uintptr_t>(pointer) >= end)
-    {
+    if (reinterpret_cast<uintptr_t>(pointer) < start ||
+        reinterpret_cast<uintptr_t>(pointer) >= end) {
         panic("Out of bounds!");
     }
 }
 
 void* Allocator::allocate_internal(size_t size) {
-    if(size == 0) {
+    if (size == 0) {
         panic("Cannot allocate object of size zero");
     }
-    if(buffer == nullptr) {
+    if (buffer == nullptr) {
         panic("Allocator has null buffer!");
     }
 
@@ -60,7 +58,7 @@ void* Allocator::allocate_internal(size_t size) {
     Node* previous_node = nullptr;
     Node* node = static_cast<Node*>(buffer);
     void* prospect = buffer;
-    while(true) {
+    while (true) {
         if (reinterpret_cast<uintptr_t>(prospect) + size > reinterpret_cast<uintptr_t>(node)) {
             prospect = (uint8_t*)node + node->size;
         } else {
@@ -68,7 +66,7 @@ void* Allocator::allocate_internal(size_t size) {
         }
         previous_node = node;
         node = node->next;
-        if(node == nullptr) {
+        if (node == nullptr) {
             break;
         }
         check_bounds(node);
@@ -86,16 +84,16 @@ void Allocator::free(void* ptr) {
 
     Node* previous_node = nullptr;
     Node* node = static_cast<Node*>(buffer);
-    while(true) {
+    while (true) {
         if (node == static_cast<Node*>(ptr)) {
-            if(previous_node) {
+            if (previous_node) {
                 previous_node->next = node->next;
             }
             return;
         }
         previous_node = node;
         node = node->next;
-        if(node == nullptr) {
+        if (node == nullptr) {
             break;
         }
         check_bounds(node);

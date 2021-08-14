@@ -1,40 +1,42 @@
 #include "io.h"
-#include "cmisc.h"
-#include "serial.h"
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdarg.h>
 
+#include "cmisc.h"
+#include "serial.h"
+
 #define ARRAY_LENGTH(x) sizeof(x)/sizeof(*x)
 
-void putchar(char c){
+void putchar(char c) {
     serial_driver.putchar(c);
-};
+}
 
 bool testchar(void) {
     return serial_driver.testchar();
 }
 
-int getchar(void){
+int getchar(void) {
     return serial_driver.getchar();
 }
 
 void puts(const char* buffer) {
-    if(buffer == NULL) {
+    if (buffer == NULL) {
         puts("(NULL)");
         return;
     }
-    for(size_t i=0; buffer[i] != '\0';i++) {
+    for (size_t i=0; buffer[i] != '\0'; i++) {
         putchar(buffer[i]);
     }
 }
 
 void nputs(const char* buffer, size_t len) {
-    for(size_t i=0; i<len;i++) {
+    for (size_t i = 0; i < len; i++) {
         char c = buffer[i];
         if (c == '\0') {
             c = '.';
-        } else if ( c < 0x20 || c > 0x7f) {
+        } else if (c < 0x20 || c > 0x7f) {
             c = '?';
         }
         putchar(c);
@@ -47,9 +49,9 @@ static void puthex(T val, bool upper, int width, char pad_character) {
         "0123456789ABCDEF":"0123456789abcdef";
 
     bool hit = false;
-    for(int i=sizeof(val)*2-1;i>=0;i--) {
+    for (int i = sizeof(val)*2-1; i >= 0; i--) {
         const uint8_t nybble = (val >> (4*i)) & 0x0F;
-        if(!hit && !nybble && i != 0) {
+        if (!hit && !nybble && i != 0) {
             if (width > i) {
                 putchar(pad_character);
             }
@@ -67,7 +69,7 @@ typedef struct {
     const char* type;
 
     const char* end;
-}FormatPlaceholder ;
+} FormatPlaceholder;
 
 /* Check if `string` begins with any of the prefixes contained in `set`
  * If yes, return a pointer to the prefix in `set`
@@ -86,7 +88,7 @@ static const char* get_first_match(
     const char* __restrict__ string,
     const char* __restrict__ set
 ) {
-    while(*set != '\0') {
+    while (*set != '\0') {
         const size_t length = strlen(set);
         if (strncmp(set, string, length) == 0) {
             return set;
@@ -96,12 +98,11 @@ static const char* get_first_match(
     return NULL;
 }
 
+// See: https://en.wikipedia.org/wiki/Printf_format_string#Format_placeholder_specification
 static int parse_placeholder(const char* fmt, FormatPlaceholder* placeholder) {
-    /*https://en.wikipedia.org/wiki/Printf_format_string#Format_placeholder_specification*/
-
     // These HAVE to end with an extra '\0'
     const char* FORMAT_FLAGS = "0\0";
-    //const char* FORMAT_LENGTHS = "ll\0l\0q\0";
+    // const char* FORMAT_LENGTHS = "ll\0l\0q\0";
     const char* FORMAT_TYPES = "p\0x\0s\0c\0d\0i\0";
 
     placeholder->flag = NULL;
@@ -113,18 +114,18 @@ static int parse_placeholder(const char* fmt, FormatPlaceholder* placeholder) {
 
     // Find flags
     placeholder->flag = get_first_match(ptr, FORMAT_FLAGS);
-    if(placeholder->flag)ptr+=strlen(placeholder->flag);
+    if (placeholder->flag)ptr+=strlen(placeholder->flag);
 
     // Find width
-    while(string_has("0123456789", *ptr)) {
-        placeholder->width*=10;
-        placeholder->width+=*ptr - '0';
+    while (string_has("0123456789", *ptr)) {
+        placeholder->width *= 10;
+        placeholder->width += *ptr - '0';
         ptr++;
     }
 
     // Find type
     placeholder->type = get_first_match(ptr, FORMAT_TYPES);
-    if(placeholder->type)ptr+=strlen(placeholder->type);
+    if (placeholder->type)ptr+=strlen(placeholder->type);
 
     placeholder->end = ptr;
 
@@ -139,11 +140,11 @@ void printf(const char* fmt, ...) {
     va_end(args);
 }
 void vprintf(const char* fmt, va_list args) {
-    while(*fmt != 0) {
+    while (*fmt != 0) {
         if (*fmt == '%') {
             fmt++;
             FormatPlaceholder placeholder;
-            if(parse_placeholder(fmt, &placeholder)) {
+            if (parse_placeholder(fmt, &placeholder)) {
                 puts("Failed to parse placeholder!\n");
                 return;
             }
@@ -194,5 +195,4 @@ void vprintf(const char* fmt, va_list args) {
         fmt++;
     }
     va_end(args);
-
 }
