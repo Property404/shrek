@@ -45,6 +45,7 @@ $(EXECUTABLE_NAME).bin: $(EXECUTABLE_NAME).elf
 
 lint:
 	cpplint *.cc *.h
+	mdl *.md
 
 clean:
 	rm -f *.o
