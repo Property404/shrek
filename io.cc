@@ -194,5 +194,4 @@ void vprintf(const char* fmt, va_list args) {
         }
         fmt++;
     }
-    va_end(args);
 }
