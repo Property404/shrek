@@ -7,17 +7,16 @@ LD=$(CROSS_COMPILE)ld
 OBJCOPY=$(CROSS_COMPILE)objcopy
 QEMU=qemu-system-arm
 
-COMMON_GCC_FLAGS=-march=armv7-a -ffreestanding -Wall -Wextra -fmax-errors=1 -I\
-	include -Og -g3 -fpic $(DEFINES)
-LDFLAGS=-T linker.ld.processed -g
+COMMON_GCC_FLAGS=-march=armv7-a -ffreestanding -Wall -Wextra -fmax-errors=1 -Iinclude\
+	-Og -g3 -fpic $(DEFINES) -fno-strict-aliasing -fno-rtti -fconcepts
+LDFLAGS=-T linker.ld.processed -g --wrap=malloc
 CFLAGS=$(COMMON_GCC_FLAGS) -std=c11
-CXXFLAGS=$(COMMON_GCC_FLAGS) -fno-exceptions -std=c++17
+CXXFLAGS=$(COMMON_GCC_FLAGS) -fno-exceptions -std=c++2a
 ASFLAGS=-march=armv7-a -g3 -fpie -fpic
-CPP_DTC_FLAGS=-x assembler-with-cpp -nostdinc -I dts/include/\
-	  -D__ASSEMBLY__ -undef -D__DTS__
-QEMU_FLAGS=-kernel $(EXECUTABLE_NAME).bin -serial mon:stdio -nographic 
+QEMU_FLAGS=-kernel $(EXECUTABLE_NAME).bin -serial mon:stdio -nographic
 
-OBJECTS = memory.o Allocator.o mmu.o mmu_asm.o start.o main.o serial.o io.o console.o cmisc.o boot.o pl011_uart.o got.o vectors.o panic.o
+OBJECTS = DeviceTree.o memory.o Allocator.o mmu.o mmu_asm.o start.o main.o serial.o io.o console.o \
+	  cmisc.o boot.o pl011_uart.o got.o vectors.o panic.o globals.o
 
 ifeq ($(findstring -debug,$(MAKECMDGOALS)),-debug)
 	QEMU_FLAGS+=-S
@@ -32,12 +31,12 @@ else
 endif
 
 all: $(EXECUTABLE_NAME).bin
-config.h: 
+config.h:
 	touch config.h
 linker.ld.processed:
-	 cpp $(DEFINES) linker.ld | grep -v '^#' > linker.ld.processed 
+	cpp $(DEFINES) linker.ld | grep -v '^#' > linker.ld.processed
 %.dtb: dts/%.dts
-	cpp $(CPP_DTC_FLAGS) $< | dtc -O dtb -o $@
+	dtc -O dtb $< -o $@
 $(EXECUTABLE_NAME).elf: linker.ld.processed config.h *.h $(OBJECTS)
 	$(LD) $(LDFLAGS) $(OBJECTS) -o $(EXECUTABLE_NAME).elf
 $(EXECUTABLE_NAME).bin: $(EXECUTABLE_NAME).elf
@@ -63,9 +62,9 @@ clean:
 %-debug: % ;
 
 # QEMU targets
-vexpress: $(EXECUTABLE_NAME).bin
-	$(QEMU) -s -machine vexpress-a15 -cpu cortex-a15 $(QEMU_FLAGS)
-virt: $(EXECUTABLE_NAME).bin 
-	$(QEMU) -s -machine virt   -cpu cortex-a7 $(QEMU_FLAGS)
-pi: $(EXECUTABLE_NAME).bin
-	$(QEMU) -s -machine raspi2 -cpu cortex-a7  $(QEMU_FLAGS)
+vexpress: $(EXECUTABLE_NAME).bin vexpress.dtb
+	$(QEMU) -s -machine vexpress-a15 -cpu cortex-a15 $(QEMU_FLAGS) -dtb $(@).dtb
+virt: $(EXECUTABLE_NAME).bin
+	$(QEMU) -s -machine virt -cpu cortex-a7 $(QEMU_FLAGS)
+pi: $(EXECUTABLE_NAME).bin pi.dtb
+	$(QEMU) -s -machine raspi2 -cpu cortex-a7  $(QEMU_FLAGS) -dtb $(@).dtb

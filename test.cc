@@ -1,9 +1,11 @@
 #include "common.h"
 #include "io.h"
+#include "globals.h"
 #include "List.h"
+#include "DeviceTree.h"
 
 #define REQUIRE_EQUALS(value1, value2) {if ((value1) != value2)\
-    { printf("%x != %x\n", (value1), (value2)); panic("Assertion failed");}}
+    { printf("0x%x != 0x%x\n", (value1), (value2)); panic("Assertion failed");}}
 #define REQUIRE(condition) {if (!(condition)) { panic("Assert failed: '" #condition );}}
 #define REQUIRE_NOT(condition) REQUIRE(!(condition))
 
@@ -18,21 +20,36 @@ static void alignment_test() {
     REQUIRE_NOT(ALIGNED_TO(0x180, 0x100));
 }
 
+static void device_tree_test() {
+    const auto allocations = allocator.getNumberOfAllocations();
+
+    {
+        const void* dtb = globals.device_tree->getBlobAddress();
+        DeviceTree dt(dtb);
+    }
+
+    REQUIRE_EQUALS(allocations, allocator.getNumberOfAllocations());
+}
+
 static void list_test() {
-    List<int> list;
-    REQUIRE(list.size() == 0);
+    const auto allocations = allocator.getNumberOfAllocations();
+    {
+        List<int> list;
+        REQUIRE(list.size() == 0);
 
-    list.push_back(3);
-    REQUIRE_EQUALS(list.get(0), 3);
-    REQUIRE_EQUALS(list.size(), 1);
+        list.push_back(3);
+        REQUIRE_EQUALS(list.get(0), 3);
+        REQUIRE_EQUALS(list.size(), 1);
 
-    list.push_back(1);
-    REQUIRE_EQUALS(list.get(1), 1);
-    REQUIRE_EQUALS(list.size(), 2);
+        list.push_back(1);
+        REQUIRE_EQUALS(list.get(1), 1);
+        REQUIRE_EQUALS(list.size(), 2);
 
-    list.push_back(4);
-    REQUIRE_EQUALS(list.get(2), 4);
-    REQUIRE_EQUALS(list.size(), 3);
+        list.push_back(4);
+        REQUIRE_EQUALS(list.get(2), 4);
+        REQUIRE_EQUALS(list.size(), 3);
+    }
+    REQUIRE_EQUALS(allocations, allocator.getNumberOfAllocations());
 }
 
 void quit_qemu() {
@@ -48,7 +65,7 @@ extern "C" void kmain() {
 
     alignment_test();
     list_test();
-
+    device_tree_test();
 
     printf("Test suite successful!\n");
     quit_qemu();

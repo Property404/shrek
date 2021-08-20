@@ -19,6 +19,20 @@ _start:
     mov v4, r1
     mov v5, r2
 
+
+    /* Enable NEON
+     *
+     * https://developer.arm.com/documentation/dui0472/i/compiler-coding-practices/enabling-neon-and-fpu-for-bare-metal
+     */
+#ifdef __ARM_NEON
+    mrc p15,0,r0,c1,c0,2    // Read CP Access register
+    orr r0,r0,#0x00f00000   // Enable full access to NEON/VFP (Coprocessors 10 and 11)
+    mcr p15,0,r0,c1,c0,2    // Write CP Access register
+    isb
+    mov r0,#0x40000000      // Switch on the VFP and NEON hardware
+    vmsr fpexc,r0            // Set EN bit in FPEXC
+#endif
+
     /* Address linker expects to be loaded at, which is probably wrong */
     ldr v1, =_kernel_virtual_base
 

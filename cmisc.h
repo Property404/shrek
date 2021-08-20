@@ -13,7 +13,7 @@ void memcpy(void*__restrict__ dest, const void*__restrict__ src, size_t length);
 
 int strncmp(const char* s1, const char* s2, size_t length);
 int strcmp(const char* s1, const char* s2);
-size_t strlen(const char* string);
+extern "C" size_t strlen(const char* string);
 char* strsep(char** __restrict__ stringp, const char* __restrict__ delim);
 
 /* Check if string contains character */

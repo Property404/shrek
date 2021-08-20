@@ -58,7 +58,7 @@ SECTIONS {
     }
     .heap : ALIGN(_sector_size) {
         _heap_base = .;
-        . += _stack_size;
+        . += _heap_size;
         _heap_top = .;
     }
     .stack : ALIGN(16) {

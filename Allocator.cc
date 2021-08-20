@@ -1,7 +1,6 @@
 #include "Allocator.h"
 #include "common.h"
 
-
 Allocator::Allocator(void* buffer, size_t buffer_size) {
     initialize(buffer, buffer_size);
 }
@@ -41,7 +40,7 @@ void Allocator::check_bounds(void* pointer) const {
     uintptr_t end = start + buffer_size;
     if (reinterpret_cast<uintptr_t>(pointer) < start ||
         reinterpret_cast<uintptr_t>(pointer) >= end) {
-        panic("Out of bounds!");
+        panic("Allocator: %p out of bounds <%p - %p>!", pointer, start, end);
     }
 }
 
@@ -75,7 +74,10 @@ void* Allocator::allocate_internal(size_t size) {
         panic("Out of memory");
     }
     add_node_after(prospect, size, previous_node);
-    return (uint8_t*)prospect + kNodeHeaderSize;
+
+    allocations++;
+    prospect = (uint8_t*)prospect + kNodeHeaderSize;
+    return prospect;
 }
 
 void Allocator::free(void* ptr) {
@@ -89,6 +91,7 @@ void Allocator::free(void* ptr) {
             if (previous_node) {
                 previous_node->next = node->next;
             }
+            allocations--;
             return;
         }
         previous_node = node;
@@ -99,5 +102,5 @@ void Allocator::free(void* ptr) {
         check_bounds(node);
     }
 
-    panic("Attempted to free non-allocated block");
+    panic("Attempted to double-free block at %p", ptr);
 }

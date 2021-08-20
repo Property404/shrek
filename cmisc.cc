@@ -14,7 +14,7 @@ void memcpy(void*__restrict__ dest, const void*__restrict__ src, size_t length) 
     }
 }
 
-size_t strlen(const char* string) {
+extern "C" size_t strlen(const char* string) {
     size_t i;
     for (i = 0; string[i] != '\0'; i++) {}
     return i;

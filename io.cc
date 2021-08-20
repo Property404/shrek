@@ -21,14 +21,16 @@ int getchar(void) {
     return serial_driver.getchar();
 }
 
-void puts(const char* buffer) {
+extern "C" int puts(const char* buffer) {
     if (buffer == NULL) {
         puts("(NULL)");
-        return;
+        return -1;
     }
-    for (size_t i=0; buffer[i] != '\0'; i++) {
+    size_t i;
+    for (i=0; buffer[i] != '\0'; i++) {
         putchar(buffer[i]);
     }
+    return i;
 }
 
 void nputs(const char* buffer, size_t len) {
@@ -133,20 +135,21 @@ static int parse_placeholder(const char* fmt, FormatPlaceholder* placeholder) {
 }
 
 
-void printf(const char* fmt, ...) {
+extern "C" int printf(const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
     vprintf(fmt, args);
     va_end(args);
+    return 0;
 }
-void vprintf(const char* fmt, va_list args) {
+extern "C" int vprintf(const char* fmt, va_list args) {
     while (*fmt != 0) {
         if (*fmt == '%') {
             fmt++;
             FormatPlaceholder placeholder;
             if (parse_placeholder(fmt, &placeholder)) {
                 puts("Failed to parse placeholder!\n");
-                return;
+                return -1;
             }
             fmt = placeholder.end;
 
@@ -194,4 +197,6 @@ void vprintf(const char* fmt, va_list args) {
         }
         fmt++;
     }
+
+    return 0;
 }
