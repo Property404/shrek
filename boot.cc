@@ -7,8 +7,8 @@
 #include "memory.h"
 #include "serial.h"
 
-extern uint32_t _heap_base;
-extern uint32_t _heap_size;
+// Call C++ constructors
+static void call_global_constructors();
 
 extern "C" void boot(int machine_type, void* dtb) {
     // TODO: Use device trees
@@ -31,9 +31,19 @@ extern "C" void boot(int machine_type, void* dtb) {
     printf("DTB pointer : %p\n", dtb);
     printf("DTB magic   : 0x%08x\n", *(uint32_t*)dtb);
 
-    // Set up heap allocator
-    allocator.initialize(&_heap_base, reinterpret_cast<size_t>(&_heap_size));
+    // This sets up the heap allocator
+    call_global_constructors();
 
     globals.machine_type = static_cast<MachineType>(machine_type);
     globals.device_tree = allocator.construct<DeviceTree>(dtb);
+}
+
+static void call_global_constructors() {
+    using Func = void(*)(void);
+
+    extern Func _init_array_start[0], _init_array_end[0];
+
+    for (Func* constructor = _init_array_start; constructor != _init_array_end; constructor++) {
+        (*constructor)();
+    }
 }

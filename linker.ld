@@ -28,6 +28,11 @@ SECTIONS {
     .stub   : {
         start.o(.text)
     }
+    .init_array : {
+        _init_array_start = .;
+        *(.init_array);
+        _init_array_end = .;
+    }
     .text   : {
         EXCLUDE_FILE(*vectors.o) 
             *(.text) 
