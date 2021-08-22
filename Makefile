@@ -19,7 +19,7 @@ OBJECTS = DeviceTree.o memory.o Allocator.o mmu.o mmu_asm.o start.o main.o seria
 	  cmisc.o boot.o pl011_uart.o got.o vectors.o panic.o globals.o
 
 ifeq ($(findstring -debug,$(MAKECMDGOALS)),-debug)
-	QEMU_FLAGS+=-S
+	QEMU_FLAGS+=-S -s
 endif
 ifeq ($(findstring -test,$(MAKECMDGOALS)),-test)
 	OBJECTS:=$(filter-out main.o,$(OBJECTS))
@@ -63,8 +63,8 @@ clean:
 
 # QEMU targets
 vexpress: $(EXECUTABLE_NAME).bin vexpress.dtb
-	$(QEMU) -s -machine vexpress-a15 -cpu cortex-a15 $(QEMU_FLAGS) -dtb $(@).dtb
+	$(QEMU) -machine vexpress-a15 -cpu cortex-a15 $(QEMU_FLAGS) -dtb $(@).dtb
 virt: $(EXECUTABLE_NAME).bin
-	$(QEMU) -s -machine virt -cpu cortex-a7 $(QEMU_FLAGS)
+	$(QEMU) -machine virt -cpu cortex-a7 $(QEMU_FLAGS)
 pi: $(EXECUTABLE_NAME).bin pi.dtb
-	$(QEMU) -s -machine raspi2 -cpu cortex-a7  $(QEMU_FLAGS) -dtb $(@).dtb
+	$(QEMU) -machine raspi2 -cpu cortex-a7  $(QEMU_FLAGS) -dtb $(@).dtb
