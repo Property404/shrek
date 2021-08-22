@@ -16,14 +16,14 @@ ASFLAGS=-march=armv7-a -g3 -fpie -fpic
 QEMU_FLAGS=-kernel $(EXECUTABLE_NAME).bin -serial mon:stdio -nographic
 
 OBJECTS = DeviceTree.o memory.o Allocator.o mmu.o mmu_asm.o start.o main.o serial.o io.o console.o \
-	  cmisc.o boot.o pl011_uart.o got.o vectors.o panic.o globals.o
+	  cmisc.o boot.o pl011_uart.o got.o vectors.o panic.o globals.o hacks.o
 
 ifeq ($(findstring -debug,$(MAKECMDGOALS)),-debug)
 	QEMU_FLAGS+=-S -s
 endif
 ifeq ($(findstring -test,$(MAKECMDGOALS)),-test)
 	OBJECTS:=$(filter-out main.o,$(OBJECTS))
-	OBJECTS+=test.o
+	OBJECTS+=test.o stromboli/stromboli.o
 	EXECUTABLE_NAME=kernel.test
 	QEMU_FLAGS+=-semihosting
 else
@@ -31,6 +31,7 @@ else
 endif
 
 all: $(EXECUTABLE_NAME).bin
+%.o: %.c *.h
 config.h:
 	touch config.h
 linker.ld.processed:
@@ -43,8 +44,8 @@ $(EXECUTABLE_NAME).bin: $(EXECUTABLE_NAME).elf
 	$(OBJCOPY) -O binary $< $@
 
 lint:
-	cpplint *.cc *.h
-	mdl *.md
+	cpplint $$(find . -name "*.cc" -or -name "*.h")
+	mdl $$(find . -name "*.md")
 
 clean:
 	rm -f *.o
