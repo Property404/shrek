@@ -6,3 +6,5 @@ ARM Cortex-A Series Programmer's Guide (version 4.0)
 OS Dev Wiki:
     https://wiki.osdev.org/ARMv7-A_Bare_Bones
     https://wiki.osdev.org/Raspberry_Pi_Bare_Bones
+    https://wiki.osdev.org/C%2B%2B
+    https://wiki.osdev.org/Calling_Global_Constructors
