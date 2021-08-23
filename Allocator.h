@@ -39,11 +39,6 @@ class Allocator {
     Allocator(const Allocator& other) = delete;
     Allocator operator=(const Allocator& other) = delete;
 
-    /// Called by the constructor. This is
-    /// needed because BSS is cleared.
-    /// TODO: remove this, do dynamic initialization
-    void initialize(void* buffer, size_t buffer_size);
-
     /// Allocate `size` bytes of memory off Allocator's buffer.
     template <typename T>
     T* allocate(size_t size) {

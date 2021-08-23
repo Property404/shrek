@@ -2,10 +2,6 @@
 #include "common.h"
 
 Allocator::Allocator(void* buffer, size_t buffer_size) {
-    initialize(buffer, buffer_size);
-}
-
-void Allocator::initialize(void* buffer, size_t buffer_size) {
     if (buffer == nullptr || buffer_size == 0) {
         panic("Invalid arguments for Allocator::initialize");
     }
