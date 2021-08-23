@@ -11,7 +11,7 @@ COMMON_GCC_FLAGS=-march=armv7-a -ffreestanding -Wall -Wextra -fmax-errors=1 -Iin
 	-Og -g3 -fpic $(DEFINES) -fno-strict-aliasing -fno-rtti -fconcepts
 LDFLAGS=-T linker.ld.processed -g --wrap=malloc
 CFLAGS=$(COMMON_GCC_FLAGS) -std=c11
-CXXFLAGS=$(COMMON_GCC_FLAGS) -fno-exceptions -std=c++2a
+CXXFLAGS=$(COMMON_GCC_FLAGS) -fno-exceptions -std=gnu++2a
 ASFLAGS=-march=armv7-a -g3 -fpie -fpic
 QEMU_FLAGS=-kernel $(EXECUTABLE_NAME).bin -serial mon:stdio -nographic
 
@@ -31,7 +31,7 @@ else
 endif
 
 all: $(EXECUTABLE_NAME).bin
-%.o: %.c *.h
+%.o: %.c *.h stromboli/*.h
 config.h:
 	touch config.h
 linker.ld.processed:

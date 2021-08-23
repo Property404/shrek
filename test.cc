@@ -36,6 +36,9 @@ TEST_CASE(list_test, {
     list.push_back(4);
     REQUIRE_EQUALS(list.get(2), 4);
     REQUIRE_EQUALS(list.size(), 3);
+
+    REQUIRE_PANICS(list.get(3));
+    list.get(4);
 });
 
 void quit_qemu() {
