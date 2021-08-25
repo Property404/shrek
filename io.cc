@@ -165,11 +165,11 @@ extern "C" int vprintf(const char* fmt, va_list args) {
                     const bool upper = type <= 'a';
                     const auto width = placeholder.width;
                     const auto pad_character = string_has(placeholder.flag, '0')?'0':' ';
-                    if (!strcmp(placeholder.length, "ll")) {
+                    if (placeholder.length && !strcmp(placeholder.length, "ll")) {
                         puthex(va_arg(args, long long), upper, width, pad_character);
-                    } else if (!strcmp(placeholder.length, "l")) {
+                    } else if (placeholder.length && !strcmp(placeholder.length, "l")) {
                         puthex(va_arg(args, long), upper, width, pad_character);
-                    } else if (!strcmp(placeholder.length, "q")) {
+                    } else if (placeholder.length && !strcmp(placeholder.length, "q")) {
                         puthex(va_arg(args, uint64_t), upper, width, pad_character);
                     } else  {
                         puthex(va_arg(args, unsigned), upper, width, pad_character);

@@ -1,4 +1,3 @@
-.global vector_table
 .section .text
 vector_table:
 // 0x00 - Reset
@@ -17,39 +16,32 @@ nop
 b irq_handler
 
 /* 0x1C - FIQ handler begins here */
-mov v5, #0x10
+mov a1, #0x0
 b generic_handler
 
 reset_handler:
-    mov v5, #0x11
+    mov a1, #0x1
     b generic_handler
 
 undefined_handler:
-    mov v5, #0x12
+    mov a1, #0x2
     b generic_handler
 
 swi_handler:
-    mov v5, #0x13
+    mov a1, #0x3
     b generic_handler
 
 prefetch_handler:
-    mov v5, #0x14
+    mov a1, #0x4
     b generic_handler
 
 data_handler:
-    mov v5, #0x15
+    mov a1, #0x5
     b generic_handler
 
 irq_handler:
-    mov v5, #0x16
+    mov a1, #0x6
     b generic_handler
 
 generic_handler:
-_loop_forever:
-    /*
-       For whatever reason QEMU seems to lock up when using `wfi`?
-       That is, you can't ^a+x to quit
-       `wfe` works perfectly fine though
-     */
-    wfe
-    b _loop_forever
+    ldr pc,=exception_handler

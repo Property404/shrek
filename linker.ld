@@ -10,7 +10,7 @@ ENTRY(_start)
 SECTIONS {
     _kernel_virtual_base = CONFIG_KERNEL_VIRTUAL_BASE;
 
-    _vectors_virtual_base = 0x00000000;/*TODO: change to highvecs */
+    _vectors_virtual_base = 0xFFFF0000;
 
     /* For remapping MMIO to virtual mem */
     _mmio_map_base = _kernel_virtual_base + 0x10000000;
@@ -34,7 +34,7 @@ SECTIONS {
         _init_array_end = .;
     }
     .text   : {
-        EXCLUDE_FILE(*vectors.o) 
+        EXCLUDE_FILE(*vectors_asm.o)
             *(.text) 
     }
     .rodata : { *(.rodata) }
@@ -48,9 +48,9 @@ SECTIONS {
     /* This will be relocated to _vector_table_base */
     .vtext : ALIGN(_page_size){
         _vectors_initial_base = .;
-        vectors.o(.text)
+        vectors_asm.o(.text)
     }
-    .bss    : {
+    .bss    : ALIGN(_page_size) {
         _bss_start = .;
         *(.bss COMMON)
         _bss_end = .;

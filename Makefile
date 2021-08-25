@@ -16,7 +16,7 @@ ASFLAGS=-march=armv7-a -g3 -fpie -fpic
 QEMU_FLAGS=-kernel $(EXECUTABLE_NAME).bin -serial mon:stdio -nographic
 
 OBJECTS = DeviceTree.o memory.o Allocator.o mmu.o mmu_asm.o start.o main.o serial.o io.o console.o \
-	  cmisc.o boot.o pl011_uart.o got.o vectors.o panic.o globals.o hacks.o
+	  cmisc.o boot.o pl011_uart.o got.o vectors.o panic.o globals.o hacks.o vectors_asm.o
 
 ifeq ($(findstring -debug,$(MAKECMDGOALS)),-debug)
 	QEMU_FLAGS+=-S -s

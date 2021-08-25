@@ -72,6 +72,12 @@ _start:
     dsb
     isb
 
+    // Enable high vecs
+    mrc	p15, 0, r0, c1, c0, 0	/* V bit (bit[13]) in CP15 c1 */
+    orr r0, #(1 << 13)
+    mcr	p15, 0, r0, c1, c0, 0	/* V bit (bit[13]) in CP15 c1 */
+
+    // Create page tables
     mov a1, v5
     ldr a2, =_kernel_virtual_base
     mov a3, sb 
