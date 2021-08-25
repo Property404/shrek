@@ -5,6 +5,7 @@
 #include <stdarg.h>
 
 #include "cmisc.h"
+#include "common.h"
 #include "serial.h"
 
 #define ARRAY_LENGTH(x) sizeof(x)/sizeof(*x)
@@ -102,6 +103,10 @@ static const char* get_first_match(
 
 // See: https://en.wikipedia.org/wiki/Printf_format_string#Format_placeholder_specification
 static int parse_placeholder(const char* fmt, FormatPlaceholder* placeholder) {
+    if (fmt == nullptr || placeholder == nullptr) {
+        panic("Null args");
+    }
+
     // These HAVE to end with an extra '\0'
     const char* FORMAT_FLAGS = "0\0";
     // const char* FORMAT_LENGTHS = "ll\0l\0q\0";
@@ -164,7 +169,8 @@ extern "C" int vprintf(const char* fmt, va_list args) {
                 {
                     const bool upper = type <= 'a';
                     const auto width = placeholder.width;
-                    const auto pad_character = string_has(placeholder.flag, '0')?'0':' ';
+                    const auto pad_character =
+                        (placeholder.flag != nullptr && string_has(placeholder.flag, '0'))?'0':' ';
                     if (placeholder.length && !strcmp(placeholder.length, "ll")) {
                         puthex(va_arg(args, long long), upper, width, pad_character);
                     } else if (placeholder.length && !strcmp(placeholder.length, "l")) {
