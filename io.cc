@@ -109,7 +109,7 @@ static int parse_placeholder(const char* fmt, FormatPlaceholder* placeholder) {
 
     // These HAVE to end with an extra '\0'
     const char* FORMAT_FLAGS = "0\0";
-    // const char* FORMAT_LENGTHS = "ll\0l\0q\0";
+    const char* FORMAT_LENGTHS = "ll\0l\0q\0";
     const char* FORMAT_TYPES = "p\0x\0s\0c\0d\0i\0";
 
     placeholder->flag = NULL;
@@ -129,6 +129,10 @@ static int parse_placeholder(const char* fmt, FormatPlaceholder* placeholder) {
         placeholder->width += *ptr - '0';
         ptr++;
     }
+
+    // Find length
+    placeholder->length = get_first_match(ptr, FORMAT_LENGTHS);
+    if (placeholder->length)ptr+=strlen(placeholder->length);
 
     // Find type
     placeholder->type = get_first_match(ptr, FORMAT_TYPES);
