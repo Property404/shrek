@@ -15,11 +15,13 @@
 // Convert big endian data to native endianness (little endian)
 template <typename T>
 T big_endian_to_native(T value) {
-    static_assert(sizeof(T) >= sizeof(uint32_t) &&
-        sizeof(T) <= sizeof(uint64_t),
-        "Endianness conversion is disabled for this type");
+    static_assert(sizeof(T) <= sizeof(uint64_t), "Endianness conversion is disabled for this type");
 
-    if constexpr (sizeof(T) == sizeof(uint32_t)) {
+    if constexpr (sizeof(T) == sizeof(uint8_t)) {
+        return value;
+    } else if constexpr (sizeof(T) == sizeof(uint16_t)) {
+        return  __builtin_bswap16 (value);
+    } else if constexpr (sizeof(T) == sizeof(uint32_t)) {
         return __builtin_bswap32 (value);
     } else if constexpr (sizeof(T) == sizeof(uint64_t)) {
         return  __builtin_bswap64 (value);

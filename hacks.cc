@@ -9,3 +9,8 @@ namespace std {
         halt();
     }
 }
+
+
+uint32_t __dso_handle;
+extern "C" void __aeabi_atexit() {
+}

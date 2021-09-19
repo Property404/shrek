@@ -8,19 +8,17 @@
  * Dagan Martinez
  * 
  * Reference:
- * http://static6.arrow.com/aropdfconversion/32f6a7175ece91477c63bc40811c02e077718861/ddi0183.pdf
+ * https://static6.arrow.com/aropdfconversion/32f6a7175ece91477c63bc40811c02e077718861/ddi0183.pdf
  */
 
-#include <stdint.h>
-#include <stdlib.h>
-
-#include "drivers.h"
-#include "errno.h"
+#include "Driver.h"
+#include "drivers/text.h"
+#include "kerrno.h"
 #include "mmu.h"
-#include "serial.h"
+#include "io.h"
 
 // Copy-pasted from U-Boot
-static volatile struct {
+struct Pl011 {
     uint32_t    dr;        /* 0x00 Data register */
     uint32_t    ecr;        /* 0x04 Error clear register (Write) */
     uint32_t    pl010_lcrh;    /* 0x08 Line control register, high byte */
@@ -38,36 +36,40 @@ static volatile struct {
     uint32_t    pl011_fbrd;    /* 0x28 Fractional baud rate register */
     uint32_t    pl011_lcrh;    /* 0x2C Line control register */
     uint32_t    pl011_cr;    /* 0x30 Control register */
-} *uart = NULL;
+} __attribute__((packed));
 
+class Pl011UartCoupling final : public TextDeviceCoupling {
+    volatile Pl011* uart = nullptr;
 
-static void pl011_putchar(char c) {
-    uart->dr = c;
-}
-
-static bool pl011_testchar(void) {
-    if (uart->fr & 0x010)
-        return false;
-    return true;
-}
-
-static int pl011_getchar(void) {
-    if (uart->fr & 0x010)
-        return EAGAIN;
-
-    const int data = (*(volatile uint32_t *)(uart));
-    if (data & 0xFFFFFF00) {
-        // Clear errors
-        uart->ecr = 0xFFFFFFFF;
-        return -1;
+ public:
+    Pl011UartCoupling(const DeviceNode* node) {
+        void* physical_address = node->getBaseAddress();
+        uart = (decltype(uart))remap_mmio(physical_address);
     }
-    return data;
-}
 
-#include "io.h"
-void pl011_uart_init(void* address) {
-    uart = (decltype(uart))remap_mmio(address);
-    serial_driver.getchar = pl011_getchar;
-    serial_driver.putchar = pl011_putchar;
-    serial_driver.testchar = pl011_testchar;
-}
+
+    int getCharacter() override {
+        if (uart->fr & 0x010)
+            return EAGAIN;
+
+        const int data = (*(volatile uint32_t *)(uart));
+        if (data & 0xFFFFFF00) {
+            // Clear errors
+            uart->ecr = 0xFFFFFFFF;
+            return -1;
+        }
+        return data;
+    }
+
+    void putCharacter(char c) override {
+        uart->dr = c;
+    }
+
+    bool characterIsAvailable() override {
+        if (uart->fr & 0x010)
+            return false;
+        return true;
+    }
+};
+
+REGISTER_DRIVER("arm,pl011", Pl011UartCoupling);

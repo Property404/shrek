@@ -7,23 +7,25 @@ LD=$(CROSS_COMPILE)ld
 OBJCOPY=$(CROSS_COMPILE)objcopy
 QEMU=qemu-system-arm
 
-COMMON_GCC_FLAGS=-march=armv7-a -ffreestanding -Wall -Wextra -fmax-errors=1 -Iinclude\
-	-Og -g3 -fpic $(DEFINES) -fno-strict-aliasing -fno-rtti -fconcepts
+CXXFLAGS=-march=armv7-a -ffreestanding -Wall -Wextra -fmax-errors=1 -Iinclude \
+	-Og -g3 -fpic $(DEFINES) -fno-strict-aliasing -fconcepts \
+	-fno-exceptions -std=gnu++2a -I. --no-rtti 
 LDFLAGS=-T linker.ld.processed -g --wrap=malloc
-CFLAGS=$(COMMON_GCC_FLAGS) -std=c11
-CXXFLAGS=$(COMMON_GCC_FLAGS) -fno-exceptions -std=c++2a
 ASFLAGS=-march=armv7-a -g3 -fpie -fpic
 QEMU_FLAGS=-kernel $(EXECUTABLE_NAME).bin -serial mon:stdio -nographic
 
-OBJECTS = DeviceTree.o memory.o Allocator.o mmu.o mmu_asm.o start.o main.o serial.o io.o console.o \
-	  cmisc.o boot.o pl011_uart.o got.o vectors.o panic.o globals.o hacks.o vectors_asm.o
+ASM_SOURCES=$(wildcard *.S)
+CXX_SOURCES=$(wildcard *.cc) $(wildcard drivers/*.cc)\
+	$(wildcard drivers/text/*.cc)
+OBJECTS=$(CXX_SOURCES:.cc=.o) $(ASM_SOURCES:.S=.o)
 
 ifeq ($(findstring -debug,$(MAKECMDGOALS)),-debug)
 	QEMU_FLAGS+=-S -s
 endif
 ifeq ($(findstring -test,$(MAKECMDGOALS)),-test)
+	TEST_SOURCES+=$(wildcard stromboli/*.cc) $(wildcard tests/*.cc) 
 	OBJECTS:=$(filter-out main.o,$(OBJECTS))
-	OBJECTS+=test.o stromboli/stromboli.o
+	OBJECTS+=$(TEST_SOURCES:.cc=.o)
 	EXECUTABLE_NAME=kernel.test
 	QEMU_FLAGS+=-semihosting
 else
@@ -31,7 +33,6 @@ else
 endif
 
 all: $(EXECUTABLE_NAME).bin
-%.o: %.c *.h
 config.h:
 	touch config.h
 linker.ld.processed:
@@ -48,7 +49,7 @@ lint:
 	mdl $$(find . -name "*.md")
 
 clean:
-	rm -f *.o
+	rm -f $$(find . -name "*.o")
 	rm -f *.elf
 	rm -f *.dtb
 	rm -f *.bin

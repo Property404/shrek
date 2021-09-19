@@ -7,19 +7,26 @@
 #include "cmisc.h"
 #include "common.h"
 #include "serial.h"
+#include "drivers/text.h"
 
 #define ARRAY_LENGTH(x) sizeof(x)/sizeof(*x)
 
-void putchar(char c) {
-    serial_driver.putchar(c);
+extern "C" int putchar(int c) {
+    if (TextDeviceCoupling::initialized())
+        TextDeviceCoupling::getInstance()->putCharacter(c);
+    return 0;
 }
 
 bool testchar(void) {
-    return serial_driver.testchar();
+    if (TextDeviceCoupling::initialized())
+        return TextDeviceCoupling::getInstance()->characterIsAvailable();
+    return false;
 }
 
 int getchar(void) {
-    return serial_driver.getchar();
+    if (TextDeviceCoupling::initialized())
+        return TextDeviceCoupling::getInstance()->getCharacter();
+    return -1;
 }
 
 extern "C" int puts(const char* buffer) {

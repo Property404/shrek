@@ -5,7 +5,7 @@
 
 /// A memory allocator intended to be used to
 /// allocate memory off Shrek's heap.
-class Allocator {
+class Allocator final {
     struct Node {
         size_t size;
         Node* next;
@@ -48,13 +48,8 @@ class Allocator {
     /// Construct object in place
     template <typename T, typename... Ts>
     T* construct(Ts&&... args) {
-        // Okay, we're not really doing this in place. Just constructing and then moving to
-        // the spot we allocated. The disadvantage here being of course we need a move constructor.
-        // I'm not sure how to do otherwise, though.
-        T object(std::forward<Ts>(args)...);
-        T* pointer = static_cast<T*>(allocate_internal(sizeof(T)));
-        *pointer = std::move(object);
-        return pointer;
+        return new((void*)(static_cast<T*>(allocate_internal(sizeof(T)))))
+            T(std::forward<Ts>(args)...);
     }
 
     /// Free memory back to Allocator.

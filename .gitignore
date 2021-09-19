@@ -1,6 +1,9 @@
 *
 
 !stromboli
+!tests
+!drivers
+!drivers/**/
 
 !.gitignore
 !Makefile

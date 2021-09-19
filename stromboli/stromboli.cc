@@ -1,6 +1,8 @@
 #include "stromboli.h"
+#include "../List.h"
 #include "../memory.h"
 #include "../io.h"
+#include "../cmisc.h"
 
 namespace Stromboli {
 
@@ -12,12 +14,22 @@ void runTests() {
     }
 }
 
-TestCase::TestCase(const char* name, Action func) {
+TestCase::TestCase(const char* file_name, const char* name, Action func) {
     if (test_cases == nullptr) {
         test_cases = allocator.allocate<List<TestCase*>>(sizeof(*test_cases));
     }
 
-    this->name = name;
+    this->name = allocator.allocate<char>(strlen(file_name) + strlen(name));
+
+    // Display the name in namespace::test_name format
+    size_t index;
+    for (index = 0; file_name[index] != '.'; index++) {
+        this->name[index] = file_name[index];
+    }
+    this->name[index++] = ':';
+    this->name[index++] = ':';
+    memcpy(this->name + index, name, strlen(name) + 1);  // Include nullptr
+
     this->action = allocator.allocate<Action>(sizeof(func));
     *action = func;
 
@@ -25,7 +37,9 @@ TestCase::TestCase(const char* name, Action func) {
 }
 
 void TestCase::run() {
-    printf("Running <%s>\n", name);
+    printf("Running test <%s>\n", this->name);
+
+    // Primitive memory leak detection.
     const auto allocations_at_start = allocator.getNumberOfAllocations();
 
     (*action)();

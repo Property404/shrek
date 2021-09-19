@@ -1,17 +1,19 @@
 #include "cmisc.h"
 #include <stdbool.h>
 
-void memset(void* dest, uint8_t byte, size_t length) {
+extern "C" void* memset(void* dest, int byte, size_t length) {
     uint8_t* destination = (uint8_t*)dest;
     for (size_t i = 0; i < length; i++) {
         destination[i] = byte;
     }
+    return dest;
 }
 
-void memcpy(void*__restrict__ dest, const void*__restrict__ src, size_t length) {
+extern "C" void* memcpy(void*__restrict__  dest, const void*__restrict__  src, size_t length) {
     for (size_t i = 0; i < length; i++) {
         ((uint8_t*)dest)[i] = ((uint8_t*)src)[i];
     }
+    return dest;
 }
 
 extern "C" size_t strlen(const char* string) {
@@ -20,7 +22,7 @@ extern "C" size_t strlen(const char* string) {
     return i;
 }
 
-int strncmp(const char* s1, const char* s2, size_t length) {
+extern "C" int strncmp(const char* s1, const char* s2, size_t length) {
     if (length == 0)
         return 0;
     if (s1 == s2)
@@ -42,7 +44,7 @@ int strncmp(const char* s1, const char* s2, size_t length) {
     return 0;
 }
 
-int strcmp(const char* s1, const char* s2) {
+extern "C" int strcmp(const char* s1, const char* s2) {
     return strncmp(s1, s2, SIZE_MAX);
 }
 

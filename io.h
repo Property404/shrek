@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdarg.h>
 
-void putchar(char c);
+extern "C" int putchar(int c);
 bool testchar(void);
 extern "C" int getchar(void);
 extern "C" int puts(const char* buffer);

@@ -4,7 +4,7 @@
 
 /// Linked list.
 template <typename T>
-class List {
+class List final {
     struct Node {
         T data_;
         Node* next_;
@@ -13,6 +13,21 @@ class List {
     Node* head_;
     Node* tail_;
     size_t size_;
+
+    T& addNode(Node* new_node) {
+        new_node->next_ = nullptr;
+
+        if (tail_ == nullptr) {
+            head_ = new_node;
+            tail_ = new_node;
+        } else {
+            tail_->next_ = new_node;
+            tail_ = new_node;
+        }
+
+        size_++;
+        return new_node->data_;
+    }
 
  public:
     List() {
@@ -109,24 +124,14 @@ class List {
     T& push_back(auto&& data) {
         Node* new_node = allocator.allocate<Node>(sizeof(Node));
         new_node->data_ = std::forward<T>(data);
-        new_node->next_ = nullptr;
-
-        if (tail_ == nullptr) {
-            head_ = new_node;
-            tail_ = new_node;
-        } else {
-            tail_->next_ = new_node;
-            tail_ = new_node;
-        }
-
-        size_++;
-        return new_node->data_;
+        return this->addNode(new_node);
     }
 
     template<typename... Ts>
     T& emplace_back(Ts&&... args) {
-        T object(std::forward<Ts>(args)...);
-        return push_back(std::move(object));
+        Node* new_node = allocator.allocate<Node>(sizeof(Node));
+        new((void*)(&(new_node->data_))) T(std::forward<Ts>(args)...);
+        return this->addNode(new_node);
     }
 
     /// Get element from list at index `index`.
@@ -134,7 +139,7 @@ class List {
     /// contiguous container instead.
     T& get(size_t index) const {
         if (index >= size_) {
-            panic("Can't access non-existent element in List");
+            panic("Can't access non-existent(%x) element in List", index);
         }
 
         size_t i = 0;
@@ -154,8 +159,34 @@ class List {
         return head_->data_;
     }
 
+    /// Pop off the first element and return it
+    ///
+    /// @ returns The removed last element
+    T pop_front() {
+        if (size_ == 0) {
+            panic("Can't pop empty list");
+        }
+
+        if (head_ == nullptr) {
+            panic("List popping with a null head! (size: 0x%x)", size_);
+        }
+
+        T data = std::move(head_->data_);
+        auto next = head_->next_;
+        allocator.free(head_);
+        head_ = next;
+        if (head_ == nullptr) {
+            tail_ = nullptr;
+        }
+        size_--;
+        return data;
+    }
+
     /// Return the last element of the list.
     T& back() const {
+        if (tail_ == nullptr) {
+            panic("List: can't back() with no tail!");
+        }
         return tail_->data_;
     }
 

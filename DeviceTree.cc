@@ -3,7 +3,11 @@
 #include <cstring>
 #include "DeviceTree.private.h"
 #include "common.h"
+#include "cmisc.h"
 #include "io.h"
+
+constexpr size_t DEFAULT_NUM_SIZE_CELLS = 1;
+constexpr size_t DEFAULT_NUM_ADDRESS_CELLS = 2;
 
 DeviceNode::DeviceProperty::DeviceProperty(const char* name, size_t length, const uint8_t* value) {
     this->name = name;
@@ -17,6 +21,7 @@ DeviceNode::DeviceNode(const uint32_t* pointer, const char* strings_block) {
     }
     pointer += sizeof(FdtToken::BEGIN_NODE)/sizeof(*pointer);
 
+    this->parent = nullptr;
     this->name = reinterpret_cast<const char*>(pointer);
     pointer += ALIGN_UP(1+strlen(name), sizeof(uint32_t))/sizeof(*pointer);
 
@@ -36,6 +41,7 @@ DeviceNode::DeviceNode(const uint32_t* pointer, const char* strings_block) {
                 }
             case FdtToken::BEGIN_NODE:
                 children.emplace_back(pointer, strings_block);
+                children.back().parent = this;
                 pointer = static_cast<const uint32_t*>(children.back().end);
                 break;
             case FdtToken::NOP:
@@ -52,6 +58,153 @@ DeviceNode::DeviceNode(const uint32_t* pointer, const char* strings_block) {
         pointer++;
     }
     this->end = pointer;
+}
+
+bool DeviceNode::hasProperty(const char* name) const {
+    for (const auto& prop : properties) {
+        if (!strcmp(prop.getName(), name)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+const DeviceNode::DeviceProperty& DeviceNode::getProperty(const char* name) const {
+    for (const auto& prop : properties) {
+        if (!strcmp(prop.getName(), name)) {
+            return prop;
+        }
+    }
+    panic("Node '%s' has no property with name '%s'", this->name, name);
+    halt();
+}
+
+bool DeviceNode::hasNode(const char* name) const {
+    for (const auto& child : children) {
+        if (!strcmp(child.getName(), name) || child.hasNode(name)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+const DeviceNode& DeviceNode::getNode(const char* name) const {
+    for (const auto& child : children) {
+        if (!strcmp(child.getName(), name)) {
+            return child;
+        }
+        if (child.hasNode(name)) {
+            return child.getNode(name);
+        }
+    }
+    panic("Node '%s' has no child with name '%s'", this->name, name);
+    halt();
+}
+
+size_t DeviceNode::getNumAddressCells() const {
+    if (hasProperty("#address-cells")) {
+        const auto num_address_cells =  getProperty("#address-cells").getValueAsScalar<uint32_t>();
+        if (num_address_cells < 1) {
+            panic("#address-cells cannot be less than 1");
+        }
+        if (num_address_cells > 2) {
+            panic("This Device Tree implementation can't handle #address-cells > 2");
+        }
+        return num_address_cells;
+    } else {
+        return DEFAULT_NUM_ADDRESS_CELLS;
+    }
+}
+
+size_t DeviceNode::getNumSizeCells() const {
+    if (hasProperty("#size-cells")) {
+        const auto num_size_cells = getProperty("#size-cells").getValueAsScalar<uint32_t>();
+        if (num_size_cells < 1) {
+            panic("#size-cells cannot be less than 1");
+        }
+        if (num_size_cells > 2) {
+            panic("This Device Tree implementation can't handle #size-cells > 2 (%x)",
+                num_size_cells);
+        }
+        return num_size_cells;
+    } else {
+        return DEFAULT_NUM_SIZE_CELLS;
+    }
+}
+
+uint64_t DeviceNode::translateAddress(uint64_t address) const {
+    const auto num_size_cells = getNumSizeCells();
+    const auto num_child_address_cells = getNumAddressCells();
+    const auto num_parent_address_cells =
+        parent == nullptr?DEFAULT_NUM_ADDRESS_CELLS:parent->getNumAddressCells();
+
+    uint64_t return_value = address;
+
+    if (hasProperty("ranges")) {
+        const auto ranges = getProperty("ranges").getValueAsSlice<uint32_t>();
+
+        size_t index = 0;
+        while (index < ranges.size()) {
+            uint64_t child_base = 0;
+            for (size_t i = 0; i < num_child_address_cells; i++) {
+                child_base += static_cast<uint64_t>
+                    (ranges[index++]) << ((num_child_address_cells - 1 - i)*32);
+            }
+
+            uint64_t parent_base = 0;
+            for (size_t i = 0; i < num_parent_address_cells; i++) {
+                parent_base += static_cast<uint64_t>
+                    (ranges[index++]) << ((num_parent_address_cells - 1 - i)*32);
+            }
+
+            uint64_t size = 0;
+            for (size_t i = 0; i < num_size_cells; i++) {
+                size = static_cast<uint64_t>(ranges[index++]) << ((num_size_cells - 1  - i)*32);
+            }
+
+            if (address >= child_base && address <= child_base + size) {
+                return_value = address - child_base + parent_base;
+                break;
+            }
+        }
+    }
+
+    if (this->parent == nullptr) {
+        return return_value;
+    } else {
+        return this->parent->translateAddress(return_value);
+    }
+}
+
+void* DeviceNode::getBaseAddress() const {
+    if (this->parent == nullptr) {
+        panic("Can't get base address of root");
+    }
+
+    const auto num_address_cells = parent->getNumAddressCells();
+    const auto registers = getProperty("reg").getValueAsSlice<uint32_t>();
+
+    if (registers.size() < num_address_cells) {
+        panic("Can't access full address from `reg` property");
+    }
+
+    uint64_t  address;
+    if (num_address_cells == 1) {
+        address = registers[0];
+    } else {
+        if (registers[0] != 0) {
+            panic("Device tree implementation not equipped to deal with high addresses in reg");
+        }
+        address = registers[1];
+    }
+
+    uint64_t rv = this->parent->translateAddress(address);
+
+    if (rv > 0xFFFFFFFFULL) {
+        panic("Can't return high address as base!");
+    }
+
+    return reinterpret_cast<void*>(static_cast<uintptr_t>(rv));
 }
 
 void DeviceNode::display(int node_level) const {
@@ -79,12 +232,14 @@ void DeviceNode::display(int node_level) const {
             continue;
         }
 
+        const auto char_slice = property.getValueAsSlice<const char>();
+
         // Check if property is string or bytes
         // This is a bit of a wobbly heuristic
         bool is_string = true;
         for (size_t i=0; i < property.getLength(); i++) {
-            const char c = property.getValue()[i];
-            const char last_c = i > 0 ? property.getValue()[i-1] : '\0';
+            const char c = char_slice[i];
+            const char last_c = i > 0 ? char_slice[i-1] : '\0';
             if ((c < 0x20 || c >= 0x7F) && c != '\0') {
                 is_string = false;
                 break;
@@ -99,7 +254,7 @@ void DeviceNode::display(int node_level) const {
         if (is_string) {
             putchar('"');
             for (size_t i=0; i < property.getLength(); i++) {
-                const char c = property.getValue()[i];
+                const char c = char_slice[i];
 
                 if (i == property.getLength() - 1 && c == '\0') {
                     break;
@@ -119,8 +274,7 @@ void DeviceNode::display(int node_level) const {
                     putchar(' ');
                 }
                 printf("0x%02x",
-                    big_endian_to_native(
-                    reinterpret_cast<const uint32_t*>(property.getValue())[i]));
+                    big_endian_to_native(property.getValueAsSlice<const uint32_t>()[i]));
             }
             putchar('>');
         }
@@ -203,4 +357,28 @@ void DeviceTree::display() const {
             reinterpret_cast<uint64_t>(range.size));
     }
     root->display();
+}
+
+DeviceTree::Iterator::Iterator(NodePointer pointer) {
+    this->pointer = pointer;
+
+    if (pointer == nullptr) {
+        return;
+    }
+
+    for (const auto& child : pointer->getChildren()) {
+        stack.push_back(&child);
+    }
+}
+
+DeviceTree::Iterator& DeviceTree::Iterator::operator++() {
+    if (stack.size() == 0) {
+        pointer = nullptr;
+        return *this;
+    }
+    pointer = stack.pop_front();
+    for (const auto& child : pointer->getChildren()) {
+        stack.push_back(&child);
+    }
+    return *this;
 }
