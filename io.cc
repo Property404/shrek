@@ -6,7 +6,6 @@
 
 #include "cmisc.h"
 #include "common.h"
-#include "serial.h"
 #include "drivers/text.h"
 
 #define ARRAY_LENGTH(x) sizeof(x)/sizeof(*x)

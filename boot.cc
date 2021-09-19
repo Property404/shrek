@@ -5,7 +5,6 @@
 #include "io.h"
 #include "machine_types.h"
 #include "memory.h"
-#include "serial.h"
 
 // Call C++ constructors
 static void call_global_constructors();
