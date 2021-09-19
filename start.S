@@ -119,7 +119,6 @@ _start:
 
     // Fixup DTB pointer
     sub v5, v5, sb
-    //ldr v1, = _kernel_virtual_base
     add v5, v5, v1
 
     // Zero out BSS

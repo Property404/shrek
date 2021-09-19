@@ -55,9 +55,6 @@ public:
 };
 
 #define DEVICE_COUPLING_INTERFACE(X) X : public DeviceCoupling<X>
-#define DEVICE_COUPLING_IMPL(X) template<>\
-    X* DeviceCoupling<X>::instance = nullptr;
-
 
 #define REGISTER_DRIVER(compatible, Coupling)\
     static DriverLoader _driver_(compatible, [](const DeviceNode* node) {\
