@@ -121,7 +121,8 @@ class List final {
     }
 
     /// Add new item `data` to List.
-    T& push_back(auto&& data) {
+    template<typename U>
+    T& push_back(U&& data) {
         Node* new_node = allocator.allocate<Node>(sizeof(Node));
         new_node->data_ = std::forward<T>(data);
         return this->addNode(new_node);

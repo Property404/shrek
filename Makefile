@@ -8,7 +8,7 @@ OBJCOPY=$(CROSS_COMPILE)objcopy
 QEMU=qemu-system-arm
 
 CXXFLAGS=-march=armv7-a -ffreestanding -Wall -Wextra -fmax-errors=1 -Iinclude \
-	-Og -g3 -fpic $(DEFINES) -fno-strict-aliasing -fconcepts \
+	-Og -g3 -fpic $(DEFINES) -fno-strict-aliasing \
 	-fno-exceptions -std=gnu++2a -I. --no-rtti 
 LDFLAGS=-T linker.ld.processed -g --wrap=malloc
 ASFLAGS=-march=armv7-a -g3 -fpie -fpic
