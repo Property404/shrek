@@ -9,7 +9,7 @@ QEMU=qemu-system-arm
 
 CXXFLAGS=-march=armv7-a -ffreestanding -Wall -Wextra -fmax-errors=1 -Iinclude \
 	-Og -g3 -fpic $(DEFINES) -fno-strict-aliasing \
-	-fno-exceptions -std=gnu++2a -I. --no-rtti 
+	-fno-exceptions -std=gnu++2a -I. --no-rtti $(EXTRA_CXXFLAGS)
 LDFLAGS=-T linker.ld.processed -g --wrap=malloc
 ASFLAGS=-march=armv7-a -g3 -fpie -fpic
 QEMU_FLAGS=-kernel $(EXECUTABLE_NAME).bin -serial mon:stdio -nographic
