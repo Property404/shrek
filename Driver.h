@@ -17,6 +17,16 @@
 #include "DeviceTree.h"
 #include <functional>
 
+#define DEVICE_COUPLING_INTERFACE(X) X : public DeviceCoupling<X>
+
+#define REGISTER_DRIVER(compatible, Coupling)\
+    static DriverLoader _driver_(compatible, [](const DeviceNode* node) {\
+    if (Coupling::initialized()) { return;}\
+    Coupling* coupling_instance = allocator.construct< Coupling >(node);\
+    Coupling::setInstance(coupling_instance);\
+    });
+
+
 // https://stackoverflow.com/questions/21143835/can-i-implement-an-autonomous-self-member-type-in-c
 template <typename...Ts>
 class DeviceCoupling;
@@ -53,15 +63,6 @@ public:
         return accessInstance(nullptr) != nullptr;
     }
 };
-
-#define DEVICE_COUPLING_INTERFACE(X) X : public DeviceCoupling<X>
-
-#define REGISTER_DRIVER(compatible, Coupling)\
-    static DriverLoader _driver_(compatible, [](const DeviceNode* node) {\
-    if (Coupling::initialized()) { return;}\
-    Coupling* coupling_instance = allocator.construct< Coupling >(node);\
-    Coupling::setInstance(coupling_instance);\
-    });
 
 // A Shrek device driver.
 class DriverLoader final {
