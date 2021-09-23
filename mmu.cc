@@ -41,7 +41,7 @@ static void map_l2desc(uintptr_t virt, uint32_t attributes) {
     if (!ALIGNED_TO(virt, SECTOR_SIZE)) {
         panic("Unaligned l1->l2 mapping");
     }
-    const uint32_t ttl2_base = (uint32_t)(&_ttl2_base);
+    const uint32_t ttl2_base = (uintptr_t)(&_ttl2_base);
     const int index = virt>>20;
     write_ttl1_pte(index, (ttl2_base + TTL2_NUM_ENTRIES*index*4) |  attributes);
 }
@@ -113,7 +113,7 @@ extern "C" void write_initial_page_tables(
     map_l2desc(ALIGN_DOWN(mmio_base, SECTOR_SIZE), l2desc_attributes);
 
     // Map vector table
-    const uint32_t vectors_virtual_base = ((uint32_t)&_vectors_virtual_base) - delusion;
+    const uint32_t vectors_virtual_base = ((uintptr_t)&_vectors_virtual_base) - delusion;
     const uint32_t vectors_physical_base = (uintptr_t)(&_vectors_initial_base);
     map_region_by_page(vectors_virtual_base,
         vectors_physical_base,

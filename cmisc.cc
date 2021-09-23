@@ -1,5 +1,6 @@
 #include "cmisc.h"
 #include <stdbool.h>
+#include "panic.h"
 
 extern "C" void* memset(void* dest, int byte, size_t length) {
     uint8_t* destination = (uint8_t*)dest;
@@ -77,10 +78,13 @@ uint32_t string_to_u32(const char* str) {
 void* string_to_pointer(const char* str) {
     static_assert(sizeof (void*) == sizeof (uintptr_t),
             "Can't determine pointer size");
+
 #if UINTPTR_MAX == 0xFFFFFFFF
-    return (void*)(string_to_u32(str));
+        return (void*)(string_to_u32(str));
 #else
-#error Not implemented for this pointer size
+        (void)str;
+        panic("%s: unimplemented", nullptr);
+        return nullptr;
 #endif
 }
 
