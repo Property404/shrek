@@ -7,21 +7,21 @@ TEST_CASE(basic, {
 
     list.push_back(3);
     REQUIRE_EQUALS(list.get(0), 3);
-    REQUIRE_EQUALS(list.size(), 1);
+    REQUIRE_EQUALS(list.size(), 1u);
 
     list.push_back(1);
     REQUIRE_EQUALS(list.get(1), 1);
-    REQUIRE_EQUALS(list.size(), 2);
+    REQUIRE_EQUALS(list.size(), 2u);
 
     list.push_back(4);
     REQUIRE_EQUALS(list.get(2), 4);
-    REQUIRE_EQUALS(list.size(), 3);
+    REQUIRE_EQUALS(list.size(), 3u);
 
     // Make sure we can pop an element
     REQUIRE_EQUALS(list.pop_front(), 3);
     REQUIRE_EQUALS(list.get(0), 1);
     REQUIRE_EQUALS(list.get(1), 4);
-    REQUIRE_EQUALS(list.size(), 2);
+    REQUIRE_EQUALS(list.size(), 2u);
 });
 
 TEST_CASE(popping, {
@@ -30,7 +30,7 @@ TEST_CASE(popping, {
     List<int> list;
 
     for (int i=0; i < 4; i++) {
-        REQUIRE_EQUALS(list.size(), 0);
+        REQUIRE_EQUALS(list.size(), 0u);
 
         for (int number : numbers) {
             list.push_back(number);
@@ -44,7 +44,7 @@ TEST_CASE(popping, {
             if (j != size - 1) {
                 REQUIRE_EQUALS(list.front(), numbers[j+1]);
             }
-            REQUIRE_EQUALS(list.size(), size - j - 1)
+            REQUIRE_EQUALS(list.size(), size - j - 1);
         }
     }
 });
