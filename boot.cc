@@ -1,4 +1,5 @@
-#include <stdint.h>
+#include <cstdint>
+#include <cinttypes>
 #include "common.h"
 #include "Driver.h"
 #include "globals.h"
@@ -23,7 +24,7 @@ extern "C" void boot(int machine_type, void* dtb) {
 
     printf("Machine type: 0x%08x\n", machine_type);
     printf("DTB pointer : %p\n", dtb);
-    printf("DTB magic   : 0x%08x\n", *(uint32_t*)dtb);
+    printf("DTB magic   : 0x%08" PRIx32 "\n", *(uint32_t*)dtb);
 }
 
 static void load_drivers() {

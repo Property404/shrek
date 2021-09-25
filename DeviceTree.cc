@@ -1,6 +1,7 @@
 #include "DeviceTree.h"
 #include <cassert>
 #include <cstring>
+#include <cinttypes>
 #include "DeviceTree.private.h"
 #include "common.h"
 #include "cmisc.h"
@@ -273,7 +274,7 @@ void DeviceNode::display(int node_level) const {
                 if (i != 0) {
                     putchar(' ');
                 }
-                printf("0x%02x",
+                printf("0x%02" PRIx32,
                     big_endian_to_native(property.getValueAsSlice<const uint32_t>()[i]));
             }
             putchar('>');
