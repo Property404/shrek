@@ -38,5 +38,6 @@ bool DriverLoader::isCompatible(const DeviceNode* node) const {
 void DriverLoader::loadIfCompatible(const DeviceNode* node) {
     if (isCompatible(node)) {
         (*(this->init_function))(node);
+        loaded = true;
     }
 }

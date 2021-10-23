@@ -75,6 +75,16 @@ class DriverLoader final {
     /// Initialize this driver if compatible and create its interface.
     void loadIfCompatible(const DeviceNode* node);
 
+    /// Get DT "compatible" string
+    const char* getCompatibleString() {
+        return compatible;
+    }
+
+    /// Have we been loaded?
+    bool isLoaded() {
+        return loaded;
+    }
+
  private:
     InitFunction* init_function;
 
@@ -83,6 +93,9 @@ class DriverLoader final {
 
     // Related to the "compatible" property of device tree nodes.
     const char* compatible;
+
+    /// Have we been loaded?
+    bool loaded = false;
 };
 
 // List of all registered drivers
