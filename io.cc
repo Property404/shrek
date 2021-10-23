@@ -8,8 +8,6 @@
 #include "common.h"
 #include "drivers/text.h"
 
-#define ARRAY_LENGTH(x) sizeof(x)/sizeof(*x)
-
 extern "C" int putchar(int c) {
     if (TextDeviceCoupling::initialized())
         TextDeviceCoupling::getInstance()->putCharacter(c);
