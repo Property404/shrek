@@ -131,10 +131,12 @@ _start:
         cmp v1, v2
         bne _bss_zero_loop
 
-    // This shouldn't return
+    // Do system set up
     mov a1, v4
     mov a2, v5
     bl boot
+
+    // This shouldn't return
     bl kmain
 
     /* But if it does, enter a low power state*/

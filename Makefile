@@ -16,7 +16,8 @@ QEMU_FLAGS=-kernel $(EXECUTABLE_NAME).bin -serial mon:stdio -nographic
 
 ASM_SOURCES=$(wildcard *.S)
 CXX_SOURCES=$(wildcard *.cc) $(wildcard drivers/*.cc)\
-	$(wildcard drivers/text/*.cc) $(wildcard drivers/timer/*.cc)
+	$(wildcard drivers/text/*.cc) $(wildcard drivers/timer/*.cc) \
+	$(wildcard drivers/intc/*.cc)
 OBJECTS=$(CXX_SOURCES:.cc=.o) $(ASM_SOURCES:.S=.o)
 
 ifeq ($(findstring -debug,$(MAKECMDGOALS)),-debug)
