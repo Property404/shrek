@@ -77,17 +77,19 @@ map_region_by_page(uintptr_t virt, uintptr_t physical, size_t size, uint32_t pag
 void* remap_mmio(void* physical_device_address) {
     static unsigned block = 0;
     const uint32_t page_attributes_device   = 0x00000032;
+    const uintptr_t physical_base = ALIGN_DOWN((uintptr_t)physical_device_address, PAGE_SIZE);
 
     // Before initialization, everything is flat
     if (!mmu_enabled()) {
         return physical_device_address;
     }
 
+
     const uintptr_t virtual_address = ((uintptr_t)&_mmio_map_base)+block*PAGE_SIZE;
-    map_page(virtual_address, (uintptr_t)physical_device_address, page_attributes_device);
+    map_page(virtual_address, physical_base, page_attributes_device);
 
     block++;
-    return (void*)virtual_address;
+    return (void*)(virtual_address + (uintptr_t)(physical_device_address) - physical_base);
 }
 
 extern "C" void write_initial_page_tables(
