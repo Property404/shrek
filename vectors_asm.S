@@ -44,4 +44,18 @@ irq_handler:
     b generic_handler
 
 generic_handler:
+    ldr sp,=_irq_stack_top
+    push {r0-r11, r12, lr}
+
+    // Disable interrupts
+    mrs r1, cpsr
+    orr r1, #0x80
+    msr cpsr, r1
+
+    // Handle exception
+    ldr lr,=return_from_exception
     ldr pc,=exception_handler
+
+return_from_exception:
+    pop {r0-r11, r12, lr}
+    subs pc, lr, #4

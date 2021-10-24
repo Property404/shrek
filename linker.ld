@@ -70,6 +70,9 @@ SECTIONS {
         _stack_base = .;
         . += _stack_size;
         _stack_top = .;
+        _irq_stack_base = .;
+        . += _stack_size;
+        _irq_stack_top = .;
     }
     _kernel_virtual_end = .;
 }
