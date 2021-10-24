@@ -6,6 +6,7 @@
 #include "io.h"
 #include "machine_types.h"
 #include "memory.h"
+#include "processor.h"
 
 // Call C++ constructors
 static void call_global_constructors();
@@ -30,6 +31,8 @@ extern "C" void boot(int machine_type, void* dtb) {
     for (const auto driver : *drivers) {
         printf("\t%s%s\n", driver->isLoaded()?"+":"-", driver->getCompatibleString());
     }
+
+    enable_interrupts();
 }
 
 static void load_drivers() {
