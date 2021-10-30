@@ -2,6 +2,7 @@
 
 #pragma once
 #include <functional>
+#include <cstdio>
 #include <cinttypes>
 #include "panic.h"
 

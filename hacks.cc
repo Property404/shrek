@@ -15,3 +15,5 @@ namespace std {
 uint32_t __dso_handle;
 extern "C" void __aeabi_atexit() {
 }
+
+extern "C" void __cxa_pure_virtual() { panic("%s() called", __func__); }

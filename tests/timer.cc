@@ -8,7 +8,7 @@ TEST_CASE(monotonic_check, {
     auto last = coupling->getTicks();
 
     for (int step = 0; step < 10; step++) {
-        volatile unsigned i = 0;
+        unsigned i = 0;
         for (i = 0; i < 1000000; i++) {
             asm volatile("nop");
         }
