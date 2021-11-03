@@ -16,31 +16,31 @@ nop
 b irq_handler
 
 /* 0x1C - FIQ handler begins here */
-mov a1, #0x0
+mov a1, #0x1C
 b generic_handler
 
 reset_handler:
-    mov a1, #0x1
+    mov a1, #0x00
     b generic_handler
 
 undefined_handler:
-    mov a1, #0x2
+    mov a1, #0x04
     b generic_handler
 
 swi_handler:
-    mov a1, #0x3
+    mov a1, #0x08
     b generic_handler
 
 prefetch_handler:
-    mov a1, #0x4
+    mov a1, #0x0C
     b generic_handler
 
 data_handler:
-    mov a1, #0x5
+    mov a1, #0x10
     b generic_handler
 
 irq_handler:
-    mov a1, #0x6
+    mov a1, #0x18
     b generic_handler
 
 generic_handler:
